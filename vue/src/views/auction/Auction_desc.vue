@@ -7,7 +7,7 @@ const route = useRoute()
 const auctionDesc_list = reactive([])
 const auctionId = ref(null)
 const auctionDesc = ref(null)
-const startPrice = ref('1500000')
+const startPrice = ref()
 const inputPrice = ref('')
 const currentPrice = ref(startPrice.value)
 let countdown = ref('')
@@ -38,6 +38,8 @@ const getDesc = async () => {
     console.log('desc', res.result)
 
     auctionDesc.value = res.result
+    startPrice.value = auctionDesc.value.auction_info.start_price
+    currentPrice.value = startPrice.value
   } else {
     alert('해당 상품에 대한 desc.json 파일을 불러오지 못함')
   }
@@ -173,7 +175,7 @@ watch(
                   현재 입찰가
                 </p>
                 <p id="currentPrice" class="text-3xl font-bold accent-text">
-                  ₩ {{ Number(auctionDesc.price).toLocaleString() }}
+                  ₩ {{ Number(currentPrice).toLocaleString() }}
                 </p>
               </div>
               <div class="text-right">
@@ -190,7 +192,7 @@ watch(
               <div class="flex justify-between border-b border-gray-50 pb-2">
                 <span class="text-gray-400 font-light">시작가</span>
                 <span class="text-gray-700 font-medium">₩ {{
-                  Number(auctionDesc.auction_info.start_price).toLocaleString() }}</span>
+                  Number(startPrice).toLocaleString() }}</span>
               </div>
               <div class="flex justify-between border-b border-gray-50 pb-2">
                 <span class="text-gray-400 font-light">입찰 단위</span>
