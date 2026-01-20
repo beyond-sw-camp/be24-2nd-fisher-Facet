@@ -1,4 +1,15 @@
-<script setup></script>
+<script setup>
+  import { ref } from 'vue'
+
+const totalPoints = ref(0)
+const PointFilter = ref('price10k')
+
+const currentPoints = () => {
+  if (PointFilter.value === 'price10k') {
+    totalPoints.value += 10000
+  }
+}
+</script>
 
 <template>
   <main class="max-w-[1080px] mx-auto px-6 py-10 lg:py-16">
@@ -38,6 +49,7 @@
             <!-- Option 1 -->
             <label class="relative cursor-pointer">
               <input
+              @click="((PointFilter = 'price10k'), currentPoints())"
                 type="radio"
                 name="point_amount"
                 value="10000"
@@ -53,7 +65,11 @@
             </label>
             <!-- Option 2 -->
             <label class="relative cursor-pointer">
-              <input type="radio" name="point_amount" value="50000" class="hidden point-option" />
+              <input  @click="price50k()"
+               type="radio"
+                name="point_amount" 
+                value="50000" 
+                class="hidden point-option" />
               <div
                 class="point-card p-6 border border-gray-100 rounded-2xl transition-all text-center"
               >
@@ -63,8 +79,9 @@
             </label>
             <!-- Option 3 (Best Value) -->
             <label class="relative cursor-pointer">
-              <input type="radio" name="point_amount" value="100000" class="hidden point-option" />
+              <input @click="price100k()" type="radio" name="point_amount" value="100000" class="hidden point-option" />
               <div
+              
                 class="point-card p-6 border border-gray-100 rounded-2xl transition-all text-center relative overflow-hidden"
               >
                 <div

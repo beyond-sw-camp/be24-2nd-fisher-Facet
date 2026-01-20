@@ -60,7 +60,7 @@ const router = createRouter({
           name: 'auction_desc',
           path: 'auction/auction_desc/:num',
           meta: {
-            title: '경매 상품 설명',
+            title: '경매 상세',
             requiresAuth: false,
           },
           component: () => import('../views/auction/Auction_desc.vue'),

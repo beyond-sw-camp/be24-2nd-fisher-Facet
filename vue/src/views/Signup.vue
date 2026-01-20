@@ -2,15 +2,123 @@
 import { reactive } from 'vue'
 import api from '@/api/user'
 
+const isAgreed = ref(false)
+
 const signupForm = reactive({
   name: '',
   email: '',
   password: '',
 })
 
+const signupInputError = reactive({
+  name: {
+    errorMassage: null,
+    isValid: false,
+  },
+  email: {
+    errorMassage: null,
+    isValid: false,
+  },
+  password: {
+    errorMassage: null,
+    isValid: false,
+  },
+})
+
+
+
 const signup = async () => {
   const res = await api.signup(signupForm)
   console.log('singup', res.data)
+}
+
+
+const nameRules = () => {
+  if (signupForm.name.length < 2) {
+    signupInputError.name.errorMassage = '이름 2글자 이상 입력해야 합니다.'
+    signupInputError.name.isValid = false
+
+    return false
+  }
+
+  // /^[가-힣]+$/ - 처음부터 끝까지 이름인가
+  const hasLetter = /^[가-힣]+$/.test(signupForm.name)
+
+  if (!hasLetter) {
+    signupInputError.name.errorMassage = '이름은 한글로 입력해야 합니다.'
+    signupInputError.name.isValid = false
+
+    return false
+  }
+
+  signupInputError.name.errorMassage = ''
+  signupInputError.name.isValid = true
+  console.log(signupInputError.name.isValid)
+}
+
+const emailRules = () => {
+  if (signupForm.email.length < 5) {
+    signupInputError.email.errorMassage = 'email은 5글자 이상 입력해야 합니다.'
+    signupInputError.email.isValid = false
+
+    return false
+  }
+
+  const hasLetter = /[a-z]/.test(signupForm.email)
+  const hasSpecial = /@/.test(signupForm.email)
+
+  if (!hasLetter) {
+    signupInputError.email.errorMassage = '이메일은 영문, 이메일 형식을 모두 포함해야 합니다.'
+    signupInputError.email.isValid = false
+
+    return false
+  }
+  if (!hasSpecial) {
+    signupInputError.email.errorMassage = '이메일 형식으로 입력해야 합니다.'
+    signupInputError.email.isValid = false
+
+    return false
+  }
+
+  signupInputError.email.errorMassage = ''
+  signupInputError.email.isValid = true
+  console.log(signupInputError.email.isValid)
+}
+
+const passwordRules = () => {
+  if (signupForm.password.length < 8) {
+    signupInputError.password.errorMassage = 'Password는 8글자 이상 입력해야 합니다.'
+    signupInputError.password.isValid = false
+
+    return false
+  }
+
+  //test()는 JavaScript의 RegExp(정규 표현식) 객체에 내장된 메서드
+  const hasUpperLetter = /[A-Z]/.test(signupForm.password)
+  const hasLowerLetter = /[a-z]/.test(signupForm.password)
+  const hasNumber = /[0-9]/.test(signupForm.password)
+  const hasSpecial = /[!@$]/.test(signupForm.password)
+
+  if (!(hasUpperLetter && hasLowerLetter && hasNumber && hasSpecial)) {
+    signupInputError.password.errorMassage =
+      '비밀번호는 영문 대문자, 소문자, 숫자, 특수문자를 모두 포함해야 합니다.'
+    signupInputError.password.isValid = false
+
+    return false
+  }
+
+  signupInputError.password.errorMassage = ''
+  signupInputError.password.isValid = true
+  console.log(signupInputError.password.isValid)
+}
+
+const isFormValid = () => {
+  return !(
+    signupInputError.name.isValid &&
+    signupInputError.password.isValid &&
+    signupInputError.email.isValid &&
+    isAgreed.value
+  )
 }
 </script>
 
@@ -41,11 +149,14 @@ const signup = async () => {
             >Collector Name</label
           >
           <input
+          :class="signupInputError.name.isValid ? '' : 'inputError'"
+            @blur="nameRules()"
             v-model="signupForm.name"
             type="text"
             placeholder="성함 또는 닉네임"
             class="w-full input-style rounded-lg px-5 py-4 text-sm placeholder:text-gray-300"
           />
+          <p class="errorColor">{{ signupInputError.name.errorMassage }}</p>
         </div>
 
         <!-- Email Field with Check Button -->
@@ -56,17 +167,14 @@ const signup = async () => {
           >
           <div class="flex gap-2">
             <input
+            :class="signupInputError.name.isValid ? '' : 'inputError'"
+              @blur="emailRules()"
               v-model="signupForm.email"
               type="email"
               placeholder="example@facet.com"
               class="flex-grow input-style rounded-lg px-5 py-4 text-sm placeholder:text-gray-300"
             />
-            <button
-              type="button"
-              class="px-6 py-4 bg-gray-50 text-[10px] font-bold text-gray-500 rounded-lg hover:bg-gray-100 transition border border-gray-100 uppercase tracking-widest"
-            >
-              Verify
-            </button>
+            <p class="errorColor">{{ signupInputError.email.errorMassage }}</p>
           </div>
         </div>
 
@@ -77,11 +185,14 @@ const signup = async () => {
             >Security Password</label
           >
           <input
+          :class="signupInputError.name.isValid ? '' : 'inputError'"
+            @blur="passwordRules()"
             v-model="signupForm.password"
             type="password"
             placeholder="8-16자 영문, 숫자 조합"
             class="w-full input-style rounded-lg px-5 py-4 text-sm placeholder:text-gray-300"
           />
+          <p class="errorColor">{{ signupInputError.password.errorMassage }}</p>
         </div>
 
         <!-- Terms & Conditions -->
@@ -107,6 +218,7 @@ const signup = async () => {
         <!-- Submit Button -->
         <RouterLink to="/login">
           <button
+          :disabled="isFormValid()"
             @click="signup()"
             type="submit"
             class="w-full btn-primary font-bold py-5 rounded-lg text-[11px] tracking-[0.3em] uppercase mt-8 shadow-lg"
