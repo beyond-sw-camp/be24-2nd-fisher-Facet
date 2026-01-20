@@ -31,7 +31,7 @@ const login = async () => {
 </script>
 
 <template>
-  <div class="flex items-center justify-center min-h-screen py-16 px-6">
+  <div class="flex items-center justify-center min-h-screen py-16 px-6 bg-[#f8f6f4]">
     <div class="premium-card w-full max-w-[540px] rounded-3xl p-10 md:p-16">
       <!-- Logo & Header -->
       <RouterLink :to="{ name: 'Main_auction' }" class="text-center mb-14">
@@ -92,7 +92,7 @@ const login = async () => {
 
         <!-- Buttons -->
         <div class="flex gap-3 mt-10">
-          <button @click="login" class="btn-base btn-outline">Login</button>
+          <button @click.prevent="login()" class="btn-base btn-primary">Login</button>
           <RouterLink to="/signup" class="btn-base btn-outline">Join Now</RouterLink>
         </div>
       </div>
@@ -159,13 +159,16 @@ body {
 
 .btn-primary {
   background-color: var(--accent-color);
+  background-color: #000000;
   color: white;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
 .btn-primary:hover {
-  background-color: var(--accent-hover);
+  background-color: #1a1a1a;
+  color: white;
   transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
 }
 
 .btn-outline {
