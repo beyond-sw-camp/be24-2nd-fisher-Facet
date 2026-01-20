@@ -1,4 +1,76 @@
-<script setup></script>
+<script setup>
+  import { reactive, ref, computed, onMounted, onUnmounted } from 'vue'
+import api from '@/api/auction'
+
+const auction_list = reactive([])
+const currentList = reactive([])
+
+const getlist = async () => {
+  const res = await api.auctionList()
+
+  if (res.code == 2000) {
+    console.log('list_res', res.result)
+    auction_list.push(...res.result)
+    currentList.push(...res.result)
+  } else {
+    alert('상품에 대한 list.json의 파일을 불러오지 못함')
+  }
+}
+getlist()
+
+// [추가] 현재 선택된 탭 상태 (기본값: '전체')
+const currentFilter = ref('all')
+
+// [추가] 화면에 보여줄 프로젝트 리스트 (필터 및 정렬 적용)
+const displayItems = () => {
+  if (currentFilter.value === 'all') {
+    currentList.sort((a, b) => a.idx - b.idx)
+  }
+
+  if (currentFilter.value === 'imminent') {
+    // '마감 임박' 클릭 시: days(남은 일수)가 적은 순으로 정렬
+    currentList.sort((a, b) => a.days - b.days)
+  }
+
+  return currentList
+}
+
+const currentImg = ref(0)
+
+// 배너용 데이터 (앞의 5개만 추출 - computed로 만드는 게 가장 좋음)
+const bannerItems = computed(() => {
+  return auction_list.slice(0, 5)
+})
+
+// 다음 버튼 함수
+const nextBanner = () => {
+  // 데이터가 있을 때만 작동하도록 방어 로직 추가
+  if (bannerItems.value.length === 0) return
+
+  if (currentImg.value < bannerItems.value.length - 1) {
+    currentImg.value++
+    console.log(auction_list.slice(0, 5))
+  } else {
+    currentImg.value = 0 // 마지막이면 다시 첫 번째로
+  }
+}
+
+// 이전 버튼 함수
+const prevBanner = () => {
+  if (bannerItems.value.length === 0) return
+
+  if (currentImg.value > 0) {
+    currentImg.value--
+  } else {
+    currentImg.value = bannerItems.value.length - 1 // 처음이면 마지막으로
+  }
+}
+
+// 숫자를 '01' 형태로 포맷팅
+const formatNumber = (num) => {
+  return String(num + 1).padStart(2, '0')
+}
+</script>
 
 <template>
   <!-- Hero & Ranking Section -->
@@ -12,19 +84,18 @@
       <div id="hero-slider" class="relative w-full h-full">
         <img
           id="slider-img"
-          src="https://images.unsplash.com/photo-1515562141207-7a18b5ce7142?auto=format&fit=crop&w=1500&q=80"
+          :src="auction_list[currentImg]?.img"
           class="w-full h-full object-cover fade-in"
           alt="Main Jewelry"
         />
 
         <div class="absolute inset-0 banner-gradient"></div>
 
-        <div class="absolute bottom-10 left-10 text-white max-w-lg fade-in" id="slider-content">
+        <div class="absolute bottom-10 left-10 text-white max-w-2xl fade-in" id="slider-content">
           <h2
-            id="slider-title"
-            class="text-3xl md:text-5xl font-light font-serif-luxury leading-tight italic mb-4"
+            class="text-3xl md:text-5xl font-light font-serif-luxury leading-tight italic mb-4 line-clamp-1"
           >
-            Eternal Radiance
+            {{ auction_list[currentImg]?.name }}
           </h2>
           <p
             id="slider-desc"
@@ -34,11 +105,12 @@
           </p>
           <div class="flex space-x-2">
             <span
-              class="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] uppercase tracking-widest"
-              >Ongoing</span
+              class="px-3 py-1 bg-white/60 backdrop-blur-md rounded-full text-[10px] uppercase tracking-widest"
+              >{{ auction_list[currentImg]?.category }}</span
             >
-            <span class="px-3 py-1 bg-[#A39382] rounded-full text-[10px] uppercase tracking-widest"
-              >Exclusive</span
+            <span
+              class="px-3 py-1 bg-[#A39382] rounded-full text-[10px] uppercase tracking-widest"
+              >{{ auction_list[currentImg]?.brand }}</span
             >
           </div>
         </div>
@@ -47,16 +119,16 @@
       <div
         class="absolute bottom-6 right-10 flex items-center space-x-4 text-white text-[10px] tracking-widest z-10"
       >
-        <span id="slider-counter">01 / 05</span>
+        <span id="slider-counter">{{ formatNumber(currentImg) }} / 05</span>
         <div class="flex space-x-1">
           <button
-            id="prev-btn"
+            @click="prevBanner"
             class="w-8 h-8 flex items-center justify-center bg-black/20 hover:bg-black/40 rounded-full transition-colors"
           >
             ←
           </button>
           <button
-            id="next-btn"
+            @click="nextBanner"
             class="w-8 h-8 flex items-center justify-center bg-black/20 hover:bg-black/40 rounded-full transition-colors"
           >
             →
@@ -73,31 +145,29 @@
       </div>
       <div class="flex-1 flex flex-col justify-between space-y-4">
         <RouterLink
-          :to="`/auction/auction_desc/${i}`"
+          v-for="item in auction_list.slice(0, 7)"
+          :to="`/auction/auction_desc/${item.idx}`"
           class="flex items-center space-x-3 group"
-          v-for="i in [1, 2, 3, 4, 5]"
         >
-          <span class="text-xl font-bold italic text-[#A39382] w-6">{{ i }}</span>
+          <span class="text-xl font-bold italic text-[#A39382] w-6">{{ item.idx }}</span>
           <div class="flex-1">
             <p class="text-[13px] font-medium group-hover:underline line-clamp-1">
-              티파니 빈티지 다이아몬드 링
+              {{ item.name }}
             </p>
-            <p class="text-[11px] text-[#A39382] font-bold">1,400% 달성</p>
+            <p class="text-[11px] text-[#A39382] font-bold">{{ item.percent }}% 달성</p>
           </div>
           <div class="w-12 h-12 rounded bg-gray-100 overflow-hidden shrink-0">
-            <img
-              src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=100&q=80"
-              class="w-full h-full object-cover"
-              alt="Ring"
-            />
+            <img :src="item.img" class="w-full h-full object-cover" alt="Ring" />
           </div>
         </RouterLink>
       </div>
-      <button
-        class="w-full mt-6 py-3 bg-gray-50 text-[11px] text-gray-500 rounded-md hover:bg-gray-100 transition"
-      >
-        랭킹 전체보기
-      </button>
+      <RouterLink :to="{ name: 'auction_list' }">
+        <button
+          class="w-full mt-6 py-3 bg-gray-50 text-[11px] text-gray-500 rounded-md hover:bg-gray-100 transition"
+        >
+          랭킹 전체보기
+        </button>
+      </RouterLink>
     </div>
   </section>
 
@@ -107,76 +177,94 @@
       class="flex items-center justify-between overflow-x-auto no-scrollbar pb-4 border-b border-gray-50 space-x-6 md:space-x-0"
     >
       <div class="flex flex-col items-center min-w-[80px] cursor-pointer group">
-        <div
-          class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-2xl group-hover:border-[#A39382] border border-transparent transition-all shadow-sm"
-        >
-          💍
-        </div>
-        <span class="text-[11px] mt-3 font-medium text-gray-600">반지</span>
+        <RouterLink>
+          <div
+            class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-2xl group-hover:border-[#A39382] border border-transparent transition-all shadow-sm"
+          >
+            💍
+          </div>
+          <span class="text-[11px] mt-3 font-medium text-gray-600">반지</span>
+        </RouterLink>
       </div>
       <div class="flex flex-col items-center min-w-[80px] cursor-pointer group">
-        <div
-          class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-2xl group-hover:border-[#A39382] border border-transparent transition-all shadow-sm"
-        >
-          ✨
-        </div>
-        <span class="text-[11px] mt-3 font-medium text-gray-600">목걸이</span>
+        <RouterLink>
+          <div
+            class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-2xl group-hover:border-[#A39382] border border-transparent transition-all shadow-sm"
+          >
+            ✨
+          </div>
+          <span class="text-[11px] mt-3 font-medium text-gray-600">목걸이</span>
+        </RouterLink>
       </div>
       <div class="flex flex-col items-center min-w-[80px] cursor-pointer group">
-        <div
-          class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-2xl group-hover:border-[#A39382] border border-transparent transition-all shadow-sm"
-        >
-          💎
-        </div>
-        <span class="text-[11px] mt-3 font-medium text-gray-600">귀걸이</span>
+        <RouterLink>
+          <div
+            class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-2xl group-hover:border-[#A39382] border border-transparent transition-all shadow-sm"
+          >
+            💎
+          </div>
+          <span class="text-[11px] mt-3 font-medium text-gray-600">귀걸이</span>
+        </RouterLink>
       </div>
       <div class="flex flex-col items-center min-w-[80px] cursor-pointer group">
-        <div
-          class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-2xl group-hover:border-[#A39382] border border-transparent transition-all shadow-sm"
-        >
-          📿
-        </div>
-        <span class="text-[11px] mt-3 font-medium text-gray-600">팔찌</span>
+        <RouterLink>
+          <div
+            class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-2xl group-hover:border-[#A39382] border border-transparent transition-all shadow-sm"
+          >
+            📿
+          </div>
+          <span class="text-[11px] mt-3 font-medium text-gray-600">팔찌</span>
+        </RouterLink>
       </div>
       <div class="flex flex-col items-center min-w-[80px] cursor-pointer group">
-        <div
-          class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-2xl group-hover:border-[#A39382] border border-transparent transition-all shadow-sm"
-        >
-          ⌚
-        </div>
-        <span class="text-[11px] mt-3 font-medium text-gray-600">시계</span>
+        <RouterLink>
+          <div
+            class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-2xl group-hover:border-[#A39382] border border-transparent transition-all shadow-sm"
+          >
+            ⌚
+          </div>
+          <span class="text-[11px] mt-3 font-medium text-gray-600">시계</span>
+        </RouterLink>
       </div>
       <div class="flex flex-col items-center min-w-[80px] cursor-pointer group">
-        <div
-          class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-2xl group-hover:border-[#A39382] border border-transparent transition-all shadow-sm"
-        >
-          🔍
-        </div>
-        <span class="text-[11px] mt-3 font-medium text-gray-600">다이아</span>
+        <RouterLink>
+          <div
+            class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-2xl group-hover:border-[#A39382] border border-transparent transition-all shadow-sm"
+          >
+            🔍
+          </div>
+          <span class="text-[11px] mt-3 font-medium text-gray-600">다이아</span>
+        </RouterLink>
       </div>
       <div class="flex flex-col items-center min-w-[80px] cursor-pointer group">
-        <div
-          class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-2xl group-hover:border-[#A39382] border border-transparent transition-all shadow-sm"
-        >
-          🏺
-        </div>
-        <span class="text-[11px] mt-3 font-medium text-gray-600">빈티지</span>
+        <RouterLink>
+          <div
+            class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-2xl group-hover:border-[#A39382] border border-transparent transition-all shadow-sm"
+          >
+            🏺
+          </div>
+          <span class="text-[11px] mt-3 font-medium text-gray-600">빈티지</span>
+        </RouterLink>
       </div>
       <div class="flex flex-col items-center min-w-[80px] cursor-pointer group">
-        <div
-          class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-2xl group-hover:border-[#A39382] border border-transparent transition-all shadow-sm"
-        >
-          🔮
-        </div>
-        <span class="text-[11px] mt-3 font-medium text-gray-600">원석</span>
+        <RouterLink>
+          <div
+            class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-2xl group-hover:border-[#A39382] border border-transparent transition-all shadow-sm"
+          >
+            🔮
+          </div>
+          <span class="text-[11px] mt-3 font-medium text-gray-600">원석</span>
+        </RouterLink>
       </div>
       <div class="flex flex-col items-center min-w-[80px] cursor-pointer group">
-        <div
-          class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-2xl group-hover:border-[#A39382] border border-transparent transition-all shadow-sm"
-        >
-          🛠️
-        </div>
-        <span class="text-[11px] mt-3 font-medium text-gray-600">커스텀</span>
+        <RouterLink>
+          <div
+            class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-2xl group-hover:border-[#A39382] border border-transparent transition-all shadow-sm"
+          >
+            🛠️
+          </div>
+          <span class="text-[11px] mt-3 font-medium text-gray-600">커스텀</span>
+        </RouterLink>
       </div>
     </div>
   </section>
@@ -186,19 +274,33 @@
     <div class="flex justify-between items-end mb-8">
       <h2 class="text-2xl font-bold">인기 프로젝트</h2>
       <nav class="flex space-x-4 text-sm font-medium text-gray-400">
-        <button class="text-black border-b-2 border-black">전체</button>
-        <button class="hover:text-black">경매중</button>
-        <button class="hover:text-black">펀딩중</button>
+        <button
+          @click="((currentFilter = 'all'), displayItems())"
+          :class="currentFilter == 'all' ? 'border-black' : ''"
+          class="px-5 py-2 text-xs font-bold rounded-full transition-all border text-black hover:border-black"
+        >
+          전체
+        </button>
+        <button
+          :class="currentFilter == 'imminent' ? 'border-black' : ''"
+          @click="((currentFilter = 'imminent'), displayItems())"
+          class="px-5 py-2 text-xs font-bold rounded-full transition-all border text-black hover:border-black"
+        >
+          마감임박
+        </button>
       </nav>
     </div>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-12">
       <!-- Project Card 1 -->
-      <div class="group cursor-pointer flex flex-col h-full" v-for="num in [1, 2, 3, 4]">
+      <div
+        class="group cursor-pointer flex flex-col h-full"
+        v-for="item in currentList.slice(0, 4)"
+      >
         <div class="aspect-video overflow-hidden bg-gray-100 mb-4 relative rounded-md">
-          <RouterLink :to="`/auction/auction_desc/${num}`">
+          <RouterLink :to="`/auction/auction_desc/${item.idx}`">
             <img
-              src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=800&q=80"
+              :src="item.img"
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               alt="Jewelry"
             />
@@ -216,9 +318,9 @@
           <h3
             class="text-md font-bold leading-snug group-hover:text-[#A39382] transition-colors line-clamp-2 min-h-[48px]"
           >
-            Victoria Sapphire High Jewelry Necklace
+            {{ item.name }}
           </h3>
-          <p class="text-[12px] text-gray-400 mb-4">명품 주얼리 | Facet Collection</p>
+          <p class="text-[12px] text-gray-400 mb-4">{{ item.category }} | {{ item.brand }}</p>
 
           <!-- mt-auto를 통해 게이지바 세트가 항상 하단에 붙도록 합니다 -->
           <div class="mt-auto pt-2">
@@ -227,10 +329,14 @@
             </div>
             <div class="flex justify-between items-center mt-3">
               <div class="flex items-center space-x-2">
-                <span class="text-red-500 font-bold text-lg">14일 남음</span>
-                <span class="text-[13px] font-medium text-gray-400 italic">₩ 14,000,000</span>
+                <span class="font-bold text-lg">{{ item.days }}일 남음</span>
+                <span class="text-[13px] font-medium text-gray-400 italic"
+                  >₩ {{ item.price.toLocaleString() }}</span
+                >
               </div>
-              <span class="text-[12px] text-gray-400">24명 참여</span>
+              <span class="text-[12px] text-gray-400"
+                >{{ item.supporters.toLocaleString() }}명 참여</span
+              >
             </div>
           </div>
         </div>
@@ -241,7 +347,7 @@
       <button
         class="px-10 py-3 border border-gray-200 text-sm font-medium hover:bg-gray-50 transition rounded-md"
       >
-        <RouterLink to="/auction/auction_list">프로젝트 더보기</RouterLink>
+        <RouterLink :to="{ name: 'auction_list' }">프로젝트 더보기</RouterLink>
       </button>
     </div>
   </section>

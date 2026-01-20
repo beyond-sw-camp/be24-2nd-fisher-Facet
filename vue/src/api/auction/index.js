@@ -7,4 +7,11 @@ const auctionList = async () => {
   return res.data
 }
 
-export default { auctionList }
+const desc = async (ListId) => {
+  const res = await api.get(`/json/course/detail/${ListId}`)
+  console.log('detail_list', res.data)
+  return res.data
+}
+
+
+export default { auctionList,desc }

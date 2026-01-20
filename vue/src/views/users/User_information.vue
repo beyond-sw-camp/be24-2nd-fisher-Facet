@@ -1,4 +1,31 @@
-<script setup></script>
+<script setup>
+  import { onMounted, ref } from 'vue'
+import useAuthStore from '@/stores/useAuthStore'
+import { useRouter } from 'vue-router'
+
+const authStore = useAuthStore()
+const userInfo = ref('')
+const router = useRouter()
+
+onMounted(() => {
+  // 1. 창고에서 데이터 꺼내기
+  const savedData = localStorage.getItem('USERINFO')
+
+  if (savedData) {
+    // 2. 해독하기 (문자열 -> 객체)
+    const saveuser = JSON.parse(savedData)
+    userInfo.value = saveuser
+    console.log('유저 정보:', userInfo.value)
+  } else {
+    userName.value = '로그인 필요'
+  }
+})
+
+const logout = () => {
+  authStore.logout()
+  router.push('/')
+}
+</script>
 
 <template>
   <main class="max-w-7xl mx-auto py-16 px-6 lg:px-10">
@@ -14,7 +41,7 @@
           <div class="w-14 h-14 rounded-full bg-gray-100 border border-gray-200"></div>
           <div>
             <p class="text-sm text-gray-400 uppercase tracking-[0.2em]">Member</p>
-            <p class="text-xl font-medium text-black">Eunseo</p>
+            <p class="text-xl font-medium text-black">{{ userInfo.userName }}</p>
             <p class="text-xs text-gray-500 mt-1">level: Silver</p>
           </div>
         </div>
@@ -22,35 +49,35 @@
         <div class="mt-10 space-y-3 text-sm">
           <!-- ✅ 현재 페이지 강조 -->
           <RouterLink
-            to="/users/user_information"
+            :to="{ name: 'user_information' }"
             class="block py-3 px-4 border border-gray-100 hover:border-gray-200 transition"
           >
             내정보
           </RouterLink>
 
           <RouterLink
-            to="/users/shipping"
+            :to="{ name: 'shipping' }"
             class="block py-3 px-4 border border-gray-100 hover:border-gray-200 transition"
           >
             주문/배송
           </RouterLink>
 
           <RouterLink
-            to="/users/add_points"
+            :to="{ name: 'add_points' }"
             class="block py-3 px-4 border border-gray-100 hover:border-gray-200 transition"
           >
-            포인트 충전
+            입찰/낙찰
           </RouterLink>
 
           <RouterLink
-            to="/users/wish_list"
+            :to="{ name: 'wish_list' }"
             class="block py-3 px-4 border border-gray-100 hover:border-gray-200 transition"
           >
             위시리스트
           </RouterLink>
 
           <RouterLink
-            to="/users/ask"
+            :to="{ name: 'ask' }"
             class="block py-3 px-4 border border-gray-100 hover:border-gray-200 transition"
           >
             문의내역
@@ -70,6 +97,12 @@
             class="block py-3 px-4 border border-gray-100 hover:border-gray-200 transition text-sm"
           >
             비밀번호 변경
+          </a>
+          <a
+            @click="logout()"
+            class="block py-3 px-4 border border-gray-100 hover:border-gray-200 transition text-sm text-gray-500"
+          >
+            <button>로그아웃</button>
           </a>
           <a
             href="#withdraw"

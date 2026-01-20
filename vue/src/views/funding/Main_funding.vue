@@ -1,14 +1,37 @@
 <script setup>
-import { reactive, onMounted } from 'vue'
+import { reactive, onMounted , ref} from 'vue'
 import api from '@/api/funding'
 
 const funding_list = reactive([])
+const currentList = reactive([])
 
 const getlist = async () => {
   const res = await api.mainfundList()
   console.log(res.result)
 
-  funding_list.push(...res.result)
+  if (res.code == 2000) {
+    funding_list.push(...res.result)
+    currentList.push(...res.result)
+  } else {
+    alert('list.json 파일을 불러오지 못하였음')
+  }
+}
+
+// [추가] 현재 선택된 탭 상태 (기본값: '전체')
+const currentFilter = ref('all')
+
+// [추가] 화면에 보여줄 프로젝트 리스트 (필터 및 정렬 적용)
+const currentItem = () => {
+  if (currentFilter.value === 'all') {
+    currentList.sort((a, b) => a.idx - b.idx)
+  }
+
+  if (currentFilter.value === 'imminent') {
+    // '마감 임박' 클릭 시: days(남은 일수)가 적은 순으로 정렬
+    currentList.sort((a, b) => a.days - b.days)
+  }
+
+  return currentList
 }
 
 onMounted(() => {
@@ -21,10 +44,12 @@ onMounted(() => {
   <section class="relative h-[65vh] flex items-center overflow-hidden bg-black">
     <div class="absolute inset-0 scale-105 group">
       <img
-        src="https://images.unsplash.com/photo-1515562141207-7a18b5ce7142?auto=format&fit=crop&w=2000&q=90"
+       referrerpolicy="no-referrer"
+        :src="funding_list.img"
         class="w-full h-full object-cover opacity-60 transition-transform duration-[10s] ease-out scale-100 group-hover:scale-110"
         alt="Main Hero"
       />
+      <meta name="referrer" content="no-referrer" />
       <div class="absolute inset-0 premium-gradient"></div>
     </div>
 
@@ -54,33 +79,20 @@ onMounted(() => {
 
       <div class="flex space-x-2 reveal active" style="transition-delay: 0.2s">
         <button
-          onclick="changeTab('all')"
-          id="btn-all"
-          class="filter-btn active px-5 py-2 text-xs font-bold rounded-full transition-all border border-gray-100 hover:border-black"
+          @click="((currentFilter = 'all'), currentItem())"
+          :class="currentFilter == 'all' ? 'border-black' : ''"
+          class="px-5 py-2 text-xs font-bold rounded-full transition-all border text-black hover:border-black"
         >
           전체
         </button>
         <button
-          onclick="changeTab('popular')"
-          id="btn-popular"
-          class="filter-btn px-5 py-2 text-xs font-bold rounded-full transition-all border border-gray-100 text-gray-500 hover:text-black"
+          @click="((currentFilter = 'imminent'), currentItem())"
+          :class="currentFilter == 'imminent' ? 'border-black' : ''"
+          class="px-5 py-2 text-xs font-bold rounded-full transition-all border text-black hover:border-black"
         >
-          인기순
+          마감임
         </button>
-        <button
-          onclick="changeTab('latest')"
-          id="btn-latest"
-          class="filter-btn px-5 py-2 text-xs font-bold rounded-full transition-all border border-gray-100 text-gray-500 hover:text-black"
-        >
-          최신순
-        </button>
-        <button
-          onclick="changeTab('closing')"
-          id="btn-closing"
-          class="filter-btn px-5 py-2 text-xs font-bold rounded-full transition-all border border-gray-100 text-gray-500 hover:text-black"
-        >
-          마감임박
-        </button>
+        
       </div>
     </div>
 
@@ -89,7 +101,7 @@ onMounted(() => {
       <!-- Content will be dynamically rendered here -->
 
       <div
-        v-for="item in funding_list"
+        v-for="item in currentList.slice(0, 4)"
         class="group cursor-pointer flex flex-col h-full tab-item-enter"
       >
         <RouterLink :to="`/funding/funding_desc/${item.idx}`" class="block">
@@ -109,7 +121,7 @@ onMounted(() => {
           </div>
           <div class="flex flex-col flex-grow">
             <p class="text-[10px] text-[#A39382] font-bold tracking-[0.2em] uppercase mb-2">
-              {{ item.tag }}
+              {{ item.brand }}
             </p>
             <h3
               class=" font-bold leading-snug line-clamp-2 min-h-[40px] group-hover:text-[#A39382] transition-colors"
@@ -120,11 +132,12 @@ onMounted(() => {
             <div class="mt-auto pt-5 space-y-3">
               <div class="flex justify-between items-end">
                 <span
-                  :class="`text-2xl font-serif-luxury font-bold ${isClosing ? 'text-red-500' : 'text-[#A39382]'}`"
+                  class="`text-2xl font-serif-luxury font-bold ${isClosing ? 'text-red-500' : 'text-[#A39382]'}`"
                 >
                   {{ item.percent.toLocaleString() }}<span class="text-xs ml-0.5">%</span>
                 </span>
-                <span class="text-[13px] font-medium text-gray-900">₩{{ Number(item.price).toLocaleString() }}</span>
+                <span class="text-[13px] font-medium text-gray-900">
+                  ₩{{ item.price.toLocaleString() }}</span>
               </div>
               <div class="w-full h-[2px] bg-gray-100 overflow-hidden rounded-full">
                 <div
@@ -143,7 +156,7 @@ onMounted(() => {
     </div>
 
     <div id="load-more-container" class="mt-24 text-center reveal active">
-      <RouterLink to="/funding/funding_list" class="block">
+      <RouterLink :to="{ name: 'funding_list' }" class="block">
         <button
           onclick="handleLoadMore()"
           id="load-more-btn"

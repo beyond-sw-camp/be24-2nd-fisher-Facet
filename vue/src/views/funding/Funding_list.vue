@@ -1,19 +1,48 @@
 <script setup>
-import { reactive, onMounted } from 'vue'
-import api from '@/api/funding'
+import { reactive, computed, ref } from 'vue'
+import api from '@/api/auction'
 
-const auction_list = reactive([])
+const funding_list = reactive([])
 
 const getlist = async () => {
-  const res = await api.fundescList()
+  const res = await api.auctionList()
   console.log(res.result)
 
-  auction_list.push(...res.result)
+  if (res.code == 2000) {
+    funding_list.push(...res.result)
+  } else {
+    alert('list.json 파일을 불러오지 못하였음')
+  }
+}
+getlist()
+
+const currentFilter = ref('all')
+const currentItem = () => {
+  if (currentFilter.value === 'all') {
+    funding_list.sort((a, b) => a.idx - b.idx)
+  } else if (currentFilter.value === 'price') {
+    funding_list.sort((a, b) => a.price - b.price)
+  } else if (currentFilter.value === 'imminent') {
+    funding_list.sort((a, b) => a.days - b.days)
+  }
+  return funding_list
 }
 
-onMounted(() => {
-  getlist()
+const currentPage = ref(1)
+
+// 화면에 실제로 그려질 '현재 페이지 아이템들'을 계산
+const paginatedItems = computed(() => {
+  const start = (currentPage.value - 1) * 12
+  const end = start + 12
+  return funding_list.slice(start, end)
 })
+
+console.log('paginatedItems', paginatedItems)
+
+// 6. 숫자를 '01' 형태로 포맷팅
+const formatNumber = (num) => {
+  return String(num).padStart(2, '0')
+}
 </script>
 
 <template class="flex flex-col h-screen">
@@ -38,13 +67,24 @@ onMounted(() => {
         </h2>
         <div class="space-y-4">
           <label class="flex items-center space-x-3 cursor-pointer group">
-            <input type="checkbox" class="w-3 h-3 accent-[#A39382]" checked />
+            <input
+              type="radio"
+              name="status-filter"
+              @click="((currentFilter = 'all'), currentItem())"
+              class="w-3 h-3 accent-[#A39382] cursor-pointer"
+            />
             <span class="text-xs text-gray-500 group-hover:text-black transition"
               >현재 진행 중</span
             >
           </label>
+
           <label class="flex items-center space-x-3 cursor-pointer group">
-            <input type="checkbox" class="w-3 h-3 accent-[#A39382]" />
+            <input
+              type="radio"
+              name="status-filter"
+              @click="((currentFilter = 'imminent'), currentItem())"
+              class="w-3 h-3 accent-[#A39382] cursor-pointer"
+            />
             <span class="text-xs text-gray-500 group-hover:text-black transition"
               >마감 임박 순</span
             >
@@ -56,24 +96,26 @@ onMounted(() => {
     <main class="flex-1 overflow-y-auto p-12 bg-[#fafafa]">
       <div class="flex justify-between items-center mb-12">
         <p class="text-[12px] text-gray-400 tracking-wider">
-          SHOWING <span class="text-black font-bold">1,248</span> UNIQUE PIECES
+          SHOWING <span class="text-black font-bold">{{ funding_list.length }}</span> UNIQUE PIECES
         </p>
         <select
+          v-model="currentFilter"
+          @change="currentItem"
           class="custom-select bg-white border border-gray-100 rounded-full px-6 py-2 text-[11px] font-bold outline-none w-40 tracking-tighter cursor-pointer hover:border-[#A39382] transition"
         >
-          <option>최근 등록순</option>
-          <option>낮은 가격순</option>
-          <option>마감 임박순</option>
+          <option value="all">최근 등록순</option>
+          <option value="price">낮은 가격순</option>
+          <option value="imminent">마감 임박순</option>
         </select>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-10">
         <div
           class="premium-card bg-white rounded-3xl overflow-hidden cursor-pointer group"
-          v-for="item in auction_list"
+          v-for="item in paginatedItems"
         >
           <!-- {{ item }} -->
-          <RouterLink :to="`/auction/auction_desc/${item.idx}`" class="block">
+          <RouterLink :to="`/funding/funding_desc/${item.idx}`" class="block">
             <div class="relative overflow-hidden aspect-[4/5]">
               <img
                 :src="item.img"
@@ -87,19 +129,19 @@ onMounted(() => {
               <p class="text-[10px] text-[#A39382] font-bold tracking-[0.2em] mb-2 uppercase">
                 {{ item.category }}
               </p>
-              <h3 class="luxury-font font-bold text-lg mb-6 leading-tight h-14 overflow-hidden">
+              <h3 class="luxury-font font-bold text-lg mb-6 leading-tight h-5 overflow-hidden">
                 {{ item.name }}
               </h3>
               <div class="flex justify-between items-end pt-6 border-t border-gray-50">
                 <div>
                   <p class="text-[9px] text-gray-300 uppercase tracking-widest mb-1">Current Bid</p>
-                  <p class="text-[15px] font-bold">₩ {{ Number(item.price).toLocaleString() }}</p>
+                  <p class="text-[15px] font-bold">₩ {{ item.price.toLocaleString() }}</p>
                 </div>
                 <div class="text-right">
                   <p class="text-[9px] text-[#A39382] font-bold mb-1 uppercase tracking-widest">
                     Time Left
                   </p>
-                  <p class="text-[13px] font-medium tracking-tighter">{{ item.time }}</p>
+                  <p class="text-[13px] font-medium tracking-tighter">{{ item.days }}일 남음</p>
                 </div>
               </div>
             </div>
@@ -119,9 +161,13 @@ onMounted(() => {
           </svg>
         </button>
         <div class="flex space-x-6 text-[11px] font-bold tracking-widest">
-          <span class="text-[#A39382] border-b border-[#A39382] pb-1">01</span>
-          <span class="text-gray-300 hover:text-black cursor-pointer transition">02</span>
-          <span class="text-gray-300 hover:text-black cursor-pointer transition">03</span>
+          <span
+            v-for="item in Math.ceil(funding_list.length / 12)"
+            :key="pageNo"
+            @click="currentPage = item"
+            class="text-[#A39382] border-[#A39382] pb-1"
+            >{{ formatNumber(item) }}</span
+          >
         </div>
         <button class="text-gray-300 hover:text-[#A39382] transition">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
