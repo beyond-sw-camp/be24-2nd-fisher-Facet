@@ -1,3 +1,4 @@
+
 // 하나인 것처럼 만들어주는 것
 import { createRouter, createWebHistory } from 'vue-router'
 
@@ -58,7 +59,7 @@ const router = createRouter({
         },
         {
           name: 'auction_desc',
-          path: 'auction/auction_desc/:num',
+          path: 'auction/auction_desc/:idx',
           meta: {
             title: '경매 상세',
             requiresAuth: false,

@@ -1,5 +1,5 @@
 <script setup>
-import { reactive } from 'vue'
+import { reactive, ref } from 'vue'
 import api from '@/api/user'
 
 const isAgreed = ref(false)
@@ -172,7 +172,7 @@ const isFormValid = () => {
               v-model="signupForm.email"
               type="email"
               placeholder="example@facet.com"
-              class="flex-grow input-style rounded-lg px-5 py-4 text-sm placeholder:text-gray-300"
+              class="w-full input-style rounded-lg px-5 py-4 text-sm placeholder:text-gray-300"
             />
             <p class="errorColor">{{ signupInputError.email.errorMassage }}</p>
           </div>
@@ -185,11 +185,11 @@ const isFormValid = () => {
             >Security Password</label
           >
           <input
-          :class="signupInputError.name.isValid ? '' : 'inputError'"
+            :class="signupInputError.name.isValid ? '' : 'inputError'"
             @blur="passwordRules()"
             v-model="signupForm.password"
             type="password"
-            placeholder="8-16자 영문, 숫자 조합"
+            placeholder="8-16자 영문, 숫자, 특수문자 조합"
             class="w-full input-style rounded-lg px-5 py-4 text-sm placeholder:text-gray-300"
           />
           <p class="errorColor">{{ signupInputError.password.errorMassage }}</p>
@@ -288,5 +288,15 @@ input[type='checkbox'] {
 
 .letter-spacing-huge {
   letter-spacing: 0.4em;
+}
+
+/* --------- */
+.errorColor {
+  color: #8e7f70;
+}
+
+.inputError {
+  border-color: #8e7f70;
+  outline: none;
 }
 </style>
