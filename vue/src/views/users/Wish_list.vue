@@ -39,39 +39,6 @@ onMounted(() => {
 
         <div class="mt-10 space-y-3 text-sm">
           <RouterLink
-            to="/users/user_information"
-            class="block py-3 px-4 border border-gray-100 hover:border-gray-200 transition"
-          >
-            내정보
-          </RouterLink>
-
-          <RouterLink
-            to="/users/shipping"
-            class="block py-3 px-4 border border-gray-100 hover:border-gray-200 transition"
-          >
-            주문/배송
-          </RouterLink>
-
-          <RouterLink
-            to="/users/add_points"
-            class="block py-3 px-4 border border-gray-100 hover:border-gray-200 transition"
-          >
-            입찰/낙찰
-          </RouterLink>
-
-          <RouterLink
-            to="/users/wish_list"
-            class="block py-3 px-4 border border-gray-100 hover:border-gray-200 transition"
-          >
-            위시리스트
-          </RouterLink>
-
-          <RouterLink
-            to="/users/ask"
-            class="block py-3 px-4 border border-gray-100 hover:border-gray-200 transition"
-          >
-            문의내역
-          </RouterLink><RouterLink
             :to="{ name: 'user_information' }"
             class="block py-3 px-4 border border-gray-100 hover:border-gray-200 transition"
           >
@@ -89,7 +56,7 @@ onMounted(() => {
             :to="{ name: 'add_points' }"
             class="block py-3 px-4 border border-gray-100 hover:border-gray-200 transition"
           >
-            입찰/낙찰
+            포인트
           </RouterLink>
 
           <RouterLink

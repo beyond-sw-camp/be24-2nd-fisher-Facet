@@ -24,12 +24,24 @@ const currentPoints = () => {
   else if (PointFilter.value === 'price1000k') {
     totalPoints.value += 1000000
   }
-  else if (PointFilter.value === 'priceInput') {
-    totalPoints.value = inputPoints.value
-    inputPoints.value = null
-  }
+  
 }
 
+const confirmInput = () => {
+  
+  if (!inputPoints.value ) return
+
+  // 10,000 단위 체크 로직
+  if (inputPoints.value % 10000 !== 0) {
+    alert('포인트 충전은 10,000P 단위로만 가능합니다.')
+    inputPoints.value = 0 // 잘못된 입력 시 요약 금액 초기화
+    return
+  }
+
+
+  totalPoints.value = inputPoints.value
+  inputPoints.value = null // 엔터/탭 이후 입력창 비우기
+}
 
 const changePoint = () => {
   currentPoint.value += totalPoints.value
@@ -123,7 +135,7 @@ const changePoint = () => {
             </label>
             <!-- Custom Input -->
             <div class="flex flex-col">
-              <input @change="((PointFilter = 'priceInput'), currentPoints())" v-model="inputPoints" type="number"
+              <input @change="((PointFilter = 'priceInput'), confirmInput())" v-model="inputPoints" type="number"
                 name="point_amount" placeholder="직접 입력"
                 class="h-full p-4 bg-gray-50 border border-transparent rounded-2xl text-center text-sm font-bold input-focus transition-all" />
             </div>
