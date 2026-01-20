@@ -1,14 +1,41 @@
 <script setup>
-  import { ref } from 'vue'
+import { ref } from 'vue'
 
+const currentPoint = ref(0)
 const totalPoints = ref(0)
+const inputPoints = ref(null)
 const PointFilter = ref('price10k')
 
 const currentPoints = () => {
   if (PointFilter.value === 'price10k') {
     totalPoints.value += 10000
   }
+
+  else if (PointFilter.value === 'price50k') {
+    totalPoints.value += 50000
+  }
+
+  else if (PointFilter.value === 'price100k') {
+    totalPoints.value += 100000
+  }
+  else if (PointFilter.value === 'price500k') {
+    totalPoints.value += 500000
+  }
+  else if (PointFilter.value === 'price1000k') {
+    totalPoints.value += 1000000
+  }
+  else if (PointFilter.value === 'priceInput') {
+    totalPoints.value = inputPoints.value
+    inputPoints.value = null
+  }
 }
+
+
+const changePoint = () => {
+  currentPoint.value += totalPoints.value
+  totalPoints.value = 0
+}
+
 </script>
 
 <template>
@@ -27,12 +54,12 @@ const currentPoints = () => {
         <section class="premium-card p-8 bg-gradient-to-br from-[#1a1a1a] to-[#333333] text-white">
           <div class="flex justify-between items-center">
             <div>
-              <p class="text-[14px] uppercase tracking-widest text-gray-400 mb-2">현재 포인트</p>
-              <p class="text-3xl font-serif-luxury italic tracking-wider">1,250,000 P</p>
+              <p class="text-[14px] uppercase tracking-widest text-black mb-2">현재 포인트</p>
+              <p class="text-3xl font-serif-luxury italic tracking-wider text-black">{{ currentPoint.toLocaleString() }}
+                Point</p>
             </div>
             <div
-              class="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center text-xl bg-white/5"
-            >
+              class="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center text-xl bg-white/5">
               💎
             </div>
           </div>
@@ -40,53 +67,36 @@ const currentPoints = () => {
 
         <!-- Step 01: Amount Selection -->
         <section class="premium-card p-8">
-          <h2
-            class="text-sm font-bold uppercase tracking-widest text-gray-400 mb-8 border-b border-gray-50 pb-4"
-          >
+          <h2 class="text-sm font-bold uppercase tracking-widest text-gray-400 mb-8 border-b border-gray-50 pb-4">
             01. 충전 금액 선택
           </h2>
           <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
             <!-- Option 1 -->
             <label class="relative cursor-pointer">
-              <input
-              @click="((PointFilter = 'price10k'), currentPoints())"
-                type="radio"
-                name="point_amount"
-                value="10000"
-                class="hidden point-option"
-                checked
-              />
-              <div
-                class="point-card p-6 border border-gray-100 rounded-2xl transition-all text-center"
-              >
+              <input @click="((PointFilter = 'price10k'), currentPoints())" type="radio" name="point_amount"
+                value="10000" class="hidden point-option" checked />
+              <div class="point-card p-6 border border-gray-100 rounded-2xl transition-all text-center">
                 <p class="text-sm font-medium text-gray-400 mb-1">10,000 P</p>
                 <p class="text-lg font-bold">₩ 10,000</p>
               </div>
             </label>
             <!-- Option 2 -->
             <label class="relative cursor-pointer">
-              <input  @click="price50k()"
-               type="radio"
-                name="point_amount" 
-                value="50000" 
-                class="hidden point-option" />
-              <div
-                class="point-card p-6 border border-gray-100 rounded-2xl transition-all text-center"
-              >
+              <input @click="((PointFilter = 'price50k'), currentPoints())" type="radio" name="point_amount"
+                value="50000" class="hidden point-option" />
+              <div class="point-card p-6 border border-gray-100 rounded-2xl transition-all text-center">
                 <p class="text-sm font-medium text-gray-400 mb-1">50,000 P</p>
                 <p class="text-lg font-bold">₩ 50,000</p>
               </div>
             </label>
             <!-- Option 3 (Best Value) -->
             <label class="relative cursor-pointer">
-              <input @click="price100k()" type="radio" name="point_amount" value="100000" class="hidden point-option" />
+              <input @click="((PointFilter = 'price100k'), currentPoints())" type="radio" name="point_amount"
+                value="100000" class="hidden point-option" />
               <div
-              
-                class="point-card p-6 border border-gray-100 rounded-2xl transition-all text-center relative overflow-hidden"
-              >
+                class="point-card p-6 border border-gray-100 rounded-2xl transition-all text-center relative overflow-hidden">
                 <div
-                  class="absolute top-0 right-0 bg-[#A39382] text-white text-[8px] px-2 py-0.5 font-bold uppercase tracking-tighter"
-                >
+                  class="absolute top-0 right-0 bg-[#A39382] text-white text-[8px] px-2 py-0.5 font-bold uppercase tracking-tighter">
                   Best
                 </div>
                 <p class="text-sm font-medium text-gray-400 mb-1">100,000 P</p>
@@ -95,72 +105,62 @@ const currentPoints = () => {
             </label>
             <!-- Option 4 -->
             <label class="relative cursor-pointer">
-              <input type="radio" name="point_amount" value="500000" class="hidden point-option" />
-              <div
-                class="point-card p-6 border border-gray-100 rounded-2xl transition-all text-center"
-              >
+              <input @click="((PointFilter = 'price500k'), currentPoints())" type="radio" name="point_amount"
+                value="500000" class="hidden point-option" />
+              <div class="point-card p-6 border border-gray-100 rounded-2xl transition-all text-center">
                 <p class="text-sm font-medium text-gray-400 mb-1">500,000 P</p>
                 <p class="text-lg font-bold">₩ 500,000</p>
               </div>
             </label>
             <!-- Option 5 -->
             <label class="relative cursor-pointer">
-              <input type="radio" name="point_amount" value="1000000" class="hidden point-option" />
-              <div
-                class="point-card p-6 border border-gray-100 rounded-2xl transition-all text-center"
-              >
+              <input @click="((PointFilter = 'price1000k'), currentPoints())" type="radio" name="point_amount"
+                value="1000000" class="hidden point-option" />
+              <div class="point-card p-6 border border-gray-100 rounded-2xl transition-all text-center">
                 <p class="text-sm font-medium text-gray-400 mb-1">1,000,000 P</p>
                 <p class="text-lg font-bold">₩ 1,000,000</p>
               </div>
             </label>
             <!-- Custom Input -->
             <div class="flex flex-col">
-              <input
-                type="number"
-                placeholder="직접 입력"
-                class="h-full p-4 bg-gray-50 border border-transparent rounded-2xl text-center text-sm font-bold input-focus transition-all"
-              />
+              <input @change="((PointFilter = 'priceInput'), currentPoints())" v-model="inputPoints" type="number"
+                name="point_amount" placeholder="직접 입력"
+                class="h-full p-4 bg-gray-50 border border-transparent rounded-2xl text-center text-sm font-bold input-focus transition-all" />
             </div>
           </div>
         </section>
 
         <!-- Step 02: Payment Method -->
         <section class="premium-card p-8">
-          <h2
-            class="text-sm font-bold uppercase tracking-widest text-gray-400 mb-8 border-b border-gray-50 pb-4"
-          >
+          <h2 class="text-sm font-bold uppercase tracking-widest text-gray-400 mb-8 border-b border-gray-50 pb-4">
             02. 결제 수단
           </h2>
           <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
             <label class="cursor-pointer">
               <input type="radio" name="payment" class="hidden peer" checked />
               <div
-                class="p-4 border border-gray-100 rounded-xl text-center text-[11px] font-bold peer-checked:border-[#A39382] peer-checked:bg-[#fcfcfb] peer-checked:text-[#A39382] transition-all uppercase tracking-wider"
-              >
+                class="p-4 border border-gray-100 rounded-xl text-center text-[11px] font-bold peer-checked:border-[#A39382] peer-checked:bg-[#fcfcfb] peer-checked:text-[#A39382] transition-all uppercase tracking-wider">
                 Credit Card
               </div>
             </label>
             <label class="cursor-pointer">
               <input type="radio" name="payment" class="hidden peer" />
               <div
-                class="p-4 border border-gray-100 rounded-xl text-center text-[11px] font-bold peer-checked:border-[#A39382] peer-checked:bg-[#fcfcfb] peer-checked:text-[#A39382] transition-all uppercase tracking-wider"
-              >
+                class="p-4 border border-gray-100 rounded-xl text-center text-[11px] font-bold peer-checked:border-[#A39382] peer-checked:bg-[#fcfcfb] peer-checked:text-[#A39382] transition-all uppercase tracking-wider">
                 Naver Pay
               </div>
             </label>
             <label class="cursor-pointer">
               <input type="radio" name="payment" class="hidden peer" />
               <div
-                class="p-4 border border-gray-100 rounded-xl text-center text-[11px] font-bold peer-checked:border-[#A39382] peer-checked:bg-[#fcfcfb] peer-checked:text-[#A39382] transition-all uppercase tracking-wider"
-              >
+                class="p-4 border border-gray-100 rounded-xl text-center text-[11px] font-bold peer-checked:border-[#A39382] peer-checked:bg-[#fcfcfb] peer-checked:text-[#A39382] transition-all uppercase tracking-wider">
                 Kakao Pay
               </div>
             </label>
             <label class="cursor-pointer">
               <input type="radio" name="payment" class="hidden peer" />
               <div
-                class="p-4 border border-gray-100 rounded-xl text-center text-[11px] font-bold peer-checked:border-[#A39382] peer-checked:bg-[#fcfcfb] peer-checked:text-[#A39382] transition-all uppercase tracking-wider"
-              >
+                class="p-4 border border-gray-100 rounded-xl text-center text-[11px] font-bold peer-checked:border-[#A39382] peer-checked:bg-[#fcfcfb] peer-checked:text-[#A39382] transition-all uppercase tracking-wider">
                 Bank Transfer
               </div>
             </label>
@@ -177,11 +177,11 @@ const currentPoints = () => {
             <div class="space-y-4 text-sm mb-8 pb-8 border-b border-gray-100">
               <div class="flex justify-between text-gray-500">
                 <span>선택한 포인트</span>
-                <span class="font-medium text-[#1a1a1a]">10,000 P</span>
+                <span class="font-medium text-[#1a1a1a]">{{ totalPoints.toLocaleString() }} P</span>
               </div>
               <div class="flex justify-between text-gray-500">
                 <span>결제 금액</span>
-                <span class="font-medium text-[#1a1a1a]">₩ 10,000</span>
+                <span class="font-medium text-[#1a1a1a]">₩ {{ totalPoints.toLocaleString() }}</span>
               </div>
               <div class="flex justify-between text-gray-400 text-[11px] italic">
                 <span>* 부가세(VAT) 포함</span>
@@ -190,13 +190,12 @@ const currentPoints = () => {
 
             <div class="flex justify-between items-baseline mb-10">
               <span class="text-sm font-bold">총 결제 금액</span>
-              <span class="text-3xl font-bold text-[#A39382]">₩ 10,000</span>
+              <span class="text-3xl font-bold text-[#A39382]">₩ {{ totalPoints.toLocaleString() }}</span>
             </div>
 
             <!-- Action Button -->
-            <button
-              class="w-full py-5 bg-[#1a1a1a] text-white font-bold text-xs tracking-[0.3em] uppercase rounded-xl hover:bg-[#333333] transition-all shadow-xl shadow-black/10"
-            >
+            <button @click="changePoint()"
+              class="w-full py-5 bg-[#1a1a1a] text-white font-bold text-xs tracking-[0.3em] uppercase rounded-xl hover:bg-[#333333] transition-all shadow-xl shadow-black/10">
               Charge Point
             </button>
 
@@ -259,7 +258,7 @@ input[type='radio'] {
 }
 
 /* 포인트 선택 카드 커스텀 */
-.point-option:checked + .point-card {
+.point-option:checked+.point-card {
   border-color: var(--accent-color);
   background-color: #fcfcfb;
   box-shadow: 0 4px 15px rgba(163, 147, 130, 0.15);
