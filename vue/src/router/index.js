@@ -133,6 +133,7 @@ const router = createRouter({
           component: () => import('../views/users/User_information.vue'),
         },
         {
+          name: 'add_points',
           path: 'users/add_points',
           meta: {
             title: '포인트 충전',
@@ -141,6 +142,7 @@ const router = createRouter({
           component: () => import('../views/users/Add_points.vue'),
         },
         {
+          name: 'shipping',
           path: 'users/shipping',
           meta: {
             title: '배송 서비스',
@@ -150,7 +152,7 @@ const router = createRouter({
         },
         {
           path: 'users/wish_list',
-          name: 'wishlist',
+          name: 'wish_list',
           meta: {
             title: '위시리스트',
             requiresAuth: true,
@@ -159,6 +161,7 @@ const router = createRouter({
         },
         {
           path: 'ask',
+          name: 'ask',
           meta: {
             title: '문의 사항',
             requiresAuth: false,
