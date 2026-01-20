@@ -56,7 +56,7 @@ onMounted(() => {
             :to="{ name: 'add_points' }"
             class="block py-3 px-4 border border-gray-100 hover:border-gray-200 transition"
           >
-            입찰/낙찰
+            포인트
           </RouterLink>
 
           <RouterLink

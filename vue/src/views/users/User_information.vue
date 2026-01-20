@@ -66,7 +66,7 @@ const logout = () => {
             :to="{ name: 'add_points' }"
             class="block py-3 px-4 border border-gray-100 hover:border-gray-200 transition"
           >
-            입찰/낙찰
+            포인트
           </RouterLink>
 
           <RouterLink
@@ -166,7 +166,7 @@ const logout = () => {
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="space-y-2">
               <label class="field-label">Name</label>
-              <input class="field" type="text" value="Eunseo" placeholder="이름" />
+              <input class="field" type="text" v-model="userInfo.userName" placeholder="이름" />
               <p class="hint">실명 기반 거래/배송을 위해 정확히 입력해 주세요.</p>
             </div>
 
@@ -178,7 +178,7 @@ const logout = () => {
 
             <div class="space-y-2">
               <label class="field-label">Email</label>
-              <input class="field" type="email" value="eunseo@facet.com" placeholder="이메일" />
+              <input class="field" type="email" v-model="userInfo.email" placeholder="이메일" />
               <p class="hint">영수증/공지/문의 답변 수신에 사용됩니다.</p>
             </div>
 
