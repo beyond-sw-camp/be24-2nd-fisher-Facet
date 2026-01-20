@@ -173,101 +173,35 @@ const formatNumber = (num) => {
 
   <!-- Categories -->
   <section class="max-w-[1440px] mx-auto py-10 px-4 md:px-10">
-    <div
-      class="flex items-center justify-between overflow-x-auto no-scrollbar pb-4 border-b border-gray-50 space-x-6 md:space-x-0"
-    >
-      <div class="flex flex-col items-center min-w-[80px] cursor-pointer group">
-        <RouterLink>
-          <div
-            class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-2xl group-hover:border-[#A39382] border border-transparent transition-all shadow-sm"
-          >
-            💍
-          </div>
-          <span class="text-[11px] mt-3 font-medium text-gray-600">반지</span>
-        </RouterLink>
-      </div>
-      <div class="flex flex-col items-center min-w-[80px] cursor-pointer group">
-        <RouterLink>
-          <div
-            class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-2xl group-hover:border-[#A39382] border border-transparent transition-all shadow-sm"
-          >
-            ✨
-          </div>
-          <span class="text-[11px] mt-3 font-medium text-gray-600">목걸이</span>
-        </RouterLink>
-      </div>
-      <div class="flex flex-col items-center min-w-[80px] cursor-pointer group">
-        <RouterLink>
-          <div
-            class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-2xl group-hover:border-[#A39382] border border-transparent transition-all shadow-sm"
-          >
-            💎
-          </div>
-          <span class="text-[11px] mt-3 font-medium text-gray-600">귀걸이</span>
-        </RouterLink>
-      </div>
-      <div class="flex flex-col items-center min-w-[80px] cursor-pointer group">
-        <RouterLink>
-          <div
-            class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-2xl group-hover:border-[#A39382] border border-transparent transition-all shadow-sm"
-          >
-            📿
-          </div>
-          <span class="text-[11px] mt-3 font-medium text-gray-600">팔찌</span>
-        </RouterLink>
-      </div>
-      <div class="flex flex-col items-center min-w-[80px] cursor-pointer group">
-        <RouterLink>
-          <div
-            class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-2xl group-hover:border-[#A39382] border border-transparent transition-all shadow-sm"
-          >
-            ⌚
-          </div>
-          <span class="text-[11px] mt-3 font-medium text-gray-600">시계</span>
-        </RouterLink>
-      </div>
-      <div class="flex flex-col items-center min-w-[80px] cursor-pointer group">
-        <RouterLink>
-          <div
-            class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-2xl group-hover:border-[#A39382] border border-transparent transition-all shadow-sm"
-          >
-            🔍
-          </div>
-          <span class="text-[11px] mt-3 font-medium text-gray-600">다이아</span>
-        </RouterLink>
-      </div>
-      <div class="flex flex-col items-center min-w-[80px] cursor-pointer group">
-        <RouterLink>
-          <div
-            class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-2xl group-hover:border-[#A39382] border border-transparent transition-all shadow-sm"
-          >
-            🏺
-          </div>
-          <span class="text-[11px] mt-3 font-medium text-gray-600">빈티지</span>
-        </RouterLink>
-      </div>
-      <div class="flex flex-col items-center min-w-[80px] cursor-pointer group">
-        <RouterLink>
-          <div
-            class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-2xl group-hover:border-[#A39382] border border-transparent transition-all shadow-sm"
-          >
-            🔮
-          </div>
-          <span class="text-[11px] mt-3 font-medium text-gray-600">원석</span>
-        </RouterLink>
-      </div>
-      <div class="flex flex-col items-center min-w-[80px] cursor-pointer group">
-        <RouterLink>
-          <div
-            class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-2xl group-hover:border-[#A39382] border border-transparent transition-all shadow-sm"
-          >
-            🛠️
-          </div>
-          <span class="text-[11px] mt-3 font-medium text-gray-600">커스텀</span>
-        </RouterLink>
-      </div>
+  <div
+    class="flex items-center justify-between overflow-x-auto no-scrollbar pb-8 border-b border-gray-50"
+  >
+    <div v-for="cat in [
+      { name: '반지', icon: '💍' },
+      { name: '목걸이', icon: '✨' },
+      { name: '귀걸이', icon: '💎' },
+      { name: '팔찌', icon: '📿' },
+      { name: '시계', icon: '⌚' },
+      { name: '다이아', icon: '🔍' },
+      { name: '빈티지', icon: '🏺' },
+      { name: '원석', icon: '🔮' },
+      { name: '커스텀', icon: '🛠️' }
+    ]" :key="cat.name" class="flex flex-col items-center min-w-[90px] cursor-pointer group">
+      
+      <RouterLink to="#" class="flex flex-col items-center w-full">
+        <div
+          class="w-16 h-16 rounded-full bg-gray-50 flex items-center justify-center text-2xl group-hover:bg-white group-hover:border-[#A39382] border border-transparent transition-all duration-300 shadow-sm mb-3"
+        >
+          {{ cat.icon }}
+        </div>
+        <span class="text-[12px] font-medium text-gray-600 group-hover:text-[#A39382] transition-colors">
+          {{ cat.name }}
+        </span>
+      </RouterLink>
+      
     </div>
-  </section>
+  </div>
+</section>
 
   <!-- 추천 프로젝트 Grid -->
   <section class="max-w-[1440px] mx-auto py-12 px-4 md:px-10">

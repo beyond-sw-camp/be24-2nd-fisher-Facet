@@ -216,7 +216,7 @@ const isFormValid = () => {
         </div>
 
         <!-- Submit Button -->
-        <RouterLink to="/login">
+        <RouterLink to="/login" class="btn-base btn-outline">
           <button
           :disabled="isFormValid()"
             @click="signup()"
@@ -272,6 +272,7 @@ body {
 
 .btn-primary {
   background-color: var(--accent-color);
+  background-color: #000000;
   color: white;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
