@@ -167,6 +167,10 @@ const router = createRouter({
       ],
     },
   ],
+  // 페이지가 바뀌거나 데이터가 업데이트되었을 때 스크롤을 맨 위로 올리는 방법
+  scrollBehavior(to, from, savedPosition) {
+    return { top: 0 }
+  },
 })
 
 router.beforeEach((to, from, next) => {

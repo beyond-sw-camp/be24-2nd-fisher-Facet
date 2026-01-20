@@ -1,7 +1,9 @@
 <script setup>
 import { onMounted, reactive, ref, onUnmounted } from 'vue'
 import api from '@/api/auction'
+import { useRoute } from 'vue-router'
 
+const route = useRoute()
 const auctionDesc_list = reactive([])
 const startPrice = ref('1500000')
 const inputPrice = ref('')
@@ -9,12 +11,36 @@ const currentPrice = ref(startPrice.value)
 let countdown = ref('')
 let isDone = ref(false)
 
+// list.json 파일 불러오기
 const getlist = async () => {
   const res = await api.auctionList()
-  console.log(res.result)
+  console.log(res.code)
 
-  auctionDesc_list.push(...res.result)
+  if (res.code == 2000) {
+    console.log('desc', res.result)
+
+    auctionDesc_list.push(...res.result)
+  } else {
+    alert('상품 list.json 파일을 불러오지 못함')
+  }
 }
+
+// desc.json 파일 불러오기 
+const getDesc = async () => {
+  console.log(route.params.num)
+  auctionId.value = Number(route.params.num)
+
+  const res = await api.desc(auctionId.value)
+
+  if (res.code == 2000) {
+    console.log('desc', res.result)
+
+    auctionDesc.value = res.result
+  } else {
+    alert('해당 상품에 대한 desc.json 파일을 불러오지 못함')
+  }
+}
+
 
 
 // 3. 카운트다운 로직
@@ -83,10 +109,21 @@ const send = () => {
   }
 }
 
+const currentTab = ref('Detail')
+// URL의 파라미터(num)가 바뀔 때마다 getDesc를 다시 실행합니다.
+watch(
+  () => route.params.num,
+  () => {
+    getDesc()
+  },
+)
+
+
 onUnmounted(() => {
   if (socket) socket.close()
 
   getlist()
+  getDesc()
 })
 </script>
 
@@ -95,24 +132,24 @@ onUnmounted(() => {
   <div :class="!isDone ?  'block' : 'hidden'">
   <main class="max-w-7xl mx-auto py-12 px-6 lg:px-10 pb-60">
     <nav class="text-[10px] text-gray-400 mb-8 uppercase tracking-[0.2em]">
-      Home / Auction / Ring / <span class="text-gray-600">Midnight Sapphire Ring</span>
+      Home / Auction / {{ auctionDesc.category }} / <span class="text-gray-600">{{ auctionDesc.name }}</span>
     </nav>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-16">
       <div class="space-y-6">
         <div class="bg-gray-50 rounded-sm overflow-hidden border border-gray-100 group">
           <img
-            src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1200&q=80"
+             :src="auctionDesc.img"
             alt="Main Product"
-            class="w-full h-auto object-cover group-hover:scale-[1.02] transition duration-700"
+            class="w-full aspect-[4/4.5] object-cover group-hover:scale-[1.02] transition duration-700"
           />
         </div>
         <div class="grid grid-cols-4 gap-4">
-          <div class="border border-accent p-1 bg-white" v-for="i in [1, 2, 3, 4]">
+          <div class="border border-accent p-1 bg-white" v-for="item in auctionDesc.img_detail">
             <RouterLink to="/auction/Main_auction">
               <img
-                src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=300&q=80"
-                class="w-full grayscale hover:grayscale-0 transition cursor-pointer"
+                :src="item"
+                class="w-full aspect-square grayscale object-cover hover:grayscale-0 transition cursor-pointer"
               />
             </RouterLink>
           </div>
@@ -126,11 +163,10 @@ onUnmounted(() => {
             >Live Auction</span
           >
           <h1 class="text-4xl font-light tracking-tight mb-3 text-gray-900">
-            Midnight Sapphire Emerald Ring
+             {{ auctionDesc.name }}
           </h1>
           <p class="text-gray-500 text-sm leading-relaxed font-light">
-            이 상품은 깊은 바다의 색을 닮은 사파이어와 정교한 에메랄드 컷이 조화를 이루는
-            마스터피스입니다. 장인의 고도화된 기술로 세공된 단 하나의 작품입니다.
+            {{ auctionDesc.history }}
           </p>
         </div>
 
@@ -141,7 +177,7 @@ onUnmounted(() => {
                 현재 입찰가
               </p>
               <p id="currentPrice" class="text-3xl font-bold accent-text">
-                ₩ {{ Number(currentPrice).toLocaleString() }}
+                ₩ {{ Number(auctionDesc.price).toLocaleString() }}
               </p>
             </div>
             <div class="text-right">
@@ -158,20 +194,22 @@ onUnmounted(() => {
             <div class="flex justify-between border-b border-gray-50 pb-2">
               <span class="text-gray-400 font-light">시작가</span>
               <span class="text-gray-700 font-medium"
-                >₩ {{ Number(startPrice).toLocaleString() }}</span
+                >₩ {{ Number(auctionDesc.auction_info.start_price).toLocaleString() }}</span
               >
             </div>
             <div class="flex justify-between border-b border-gray-50 pb-2">
               <span class="text-gray-400 font-light">입찰 단위</span>
-              <span class="text-gray-700 font-medium">₩ 50,000</span>
+              <span class="text-gray-700 font-medium">
+                ₩ {{ Number(auctionDesc.auction_info.bid_unit).toLocaleString() }}</span>
             </div>
             <div class="flex justify-between border-b border-gray-50 pb-2">
               <span class="text-gray-400 font-light">총 입찰수</span>
-              <span id="bidCount" class="text-gray-700 font-medium">28회</span>
+              <span id="bidCount" class="text-gray-700 font-medium">
+                {{ Number(auctionDesc.auction_info.bid_unit).toLocaleString() }}회</span>
             </div>
             <div class="flex justify-between border-b border-gray-50 pb-2">
               <span class="text-gray-400 font-light">종료 예정</span>
-              <span class="text-gray-700 font-medium">01.05 18:00</span>
+              <span class="text-gray-700 font-medium">{{ auctionDesc.auction_info.end_date }}</span>
             </div>
           </div>
 
@@ -198,35 +236,57 @@ onUnmounted(() => {
         </div>
 
         <div class="flex border-b border-gray-100 mb-6">
-          <button class="px-6 py-3 text-[11px] font-bold tab-active uppercase tracking-[0.2em]">
-            Detail
+          <button 
+          v-for="tabBtn in ['Detail', 'History', 'Shipping']"
+          :key="tabBtn"
+            @click="currentTab = tabBtn"
+          class="px-6 py-3 text-[11px] font-bold tab-active uppercase tracking-[0.2em]">
+            {{ tabBtn }}
           </button>
-          <button
-            class="px-6 py-3 text-[11px] font-medium text-gray-400 hover:text-gray-600 uppercase tracking-[0.2em] transition-colors"
-          >
-            History
-          </button>
-          <button
-            class="px-6 py-3 text-[11px] font-medium text-gray-400 hover:text-gray-600 uppercase tracking-[0.2em] transition-colors"
-          >
-            Shipping
-          </button>
+          
         </div>
 
-        <div class="text-sm text-gray-500 leading-relaxed space-y-3 font-light">
+        <div v-if="currentTab === 'Detail'"
+        class="text-sm text-gray-500 leading-relaxed space-y-3 font-light">
           <p class="flex items-center">
-            <span class="w-1.5 h-1.5 accent-bg rounded-full mr-3"></span>원산지: 프랑스 남부
-            핸드메이드
-          </p>
-          <p class="flex items-center">
-            <span class="w-1.5 h-1.5 accent-bg rounded-full mr-3"></span>소재: 18K White Gold,
-            Natural Sapphire 2.5ct
-          </p>
-          <p class="flex items-center">
-            <span class="w-1.5 h-1.5 accent-bg rounded-full mr-3"></span>사이즈: 12호 (사이즈 조절
-            가능)
-          </p>
+              <span class="w-1.5 h-1.5 accent-bg rounded-full mr-3"></span>
+              • 원산지: {{ auctionDesc.detail.origin }}
+            </p>
+            <p class="flex items-center">
+              <span class="w-1.5 h-1.5 accent-bg rounded-full mr-3"></span>
+              • 소재: {{ auctionDesc.detail.material }}
+            </p>
+            <p class="flex items-center">
+              <span class="w-1.5 h-1.5 accent-bg rounded-full mr-3"></span>
+              • 사이즈: {{ auctionDesc.detail.size }}
+            </p>
         </div>
+        <div
+            v-if="currentTab === 'History'"
+            class="text-sm text-gray-500 leading-relaxed space-y-3 font-light"
+          >
+            <p class="flex items-center">
+              <span class="w-1.5 h-1.5 accent-bg rounded-full mr-3 mt-1.5 flex-shrink-0"></span>
+              • 상품 설명: {{ auctionDesc.history }}
+            </p>
+          </div>
+          <div
+            v-if="currentTab === 'Shipping'"
+            class="text-sm text-gray-500 leading-relaxed font-light"
+          >
+            <p class="flex items-center">
+              <span class="w-1.5 h-1.5 accent-bg rounded-full mr-3"></span>
+              • 배송방법: {{ auctionDesc.shipping.method }}
+            </p>
+            <p class="flex items-center">
+              <span class="w-1.5 h-1.5 accent-bg rounded-full mr-3"></span>
+              • 배송비: {{ Number(auctionDesc.shipping.fee).toLocaleString() }} KRW
+            </p>
+            <p class="flex items-center">
+              <span class="w-1.5 h-1.5 accent-bg rounded-full mr-3"></span>
+              • 예상 소요 시간: {{ auctionDesc.shipping.estimated_time }}
+            </p>
+          </div>
       </div>
     </div>
 
@@ -235,13 +295,13 @@ onUnmounted(() => {
         Related Artifacts
       </h2>
       <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
-        <div class="group cursor-pointer" v-for="item in auctionDesc_list">
-          <RouterLink to="/auction/auction_list">
+        <div class="group cursor-pointer" v-for="item in auctionDesc_list.slice(0, 4)">
+          <RouterLink :to="`/auction/auction_desc/${item.idx}`">
             <div
               class="aspect-square bg-gray-50 mb-4 overflow-hidden border border-gray-100 relative"
             >
               <img
-                :src="item.image"
+                :src="item.img"
                 alt="Related"
                 class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition duration-700"
               />
@@ -254,9 +314,9 @@ onUnmounted(() => {
             <h3
               class="text-[10px] uppercase tracking-widest text-gray-400 mb-1 group-hover:text-black transition-colors"
             >
-              $${{ item.name }}
+              {{ item.name }}
             </h3>
-            <p class="text-sm font-bold text-gray-800">₩ ${{ item.amount }}</p>
+            <p class="text-sm font-bold text-gray-800">₩ {{ item.price.toLocaleString() }}</p>
           </RouterLink>
         </div>
       </div>
