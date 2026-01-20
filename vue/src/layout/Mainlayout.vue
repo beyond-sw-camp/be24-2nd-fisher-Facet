@@ -8,6 +8,7 @@ const authStore = useAuthStore()
 
 // 화면에 모든것이 출력이 되면 실행해라
 onMounted(() => {
+  authStore.checkLogin()//추가
   authStore.isMainPage
 })
 </script>

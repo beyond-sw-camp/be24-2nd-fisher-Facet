@@ -1,12 +1,29 @@
 <script setup>
-import { RouterLink, useRoute } from 'vue-router'
-import { computed } from 'vue'
+import { RouterLink, useRoute, useRouter } from 'vue-router'//useRouter추가
+import { computed,ref,onMounted } from 'vue'//ref, onmounted 추가 
 import useAuthStore from '@/stores/useAuthStore'
 
+const router = useRouter()//추가
+const inputQuery = ref('')//추가
 const route = useRoute()
 const isAuction = computed(() => route.path.includes('auction'))
 const isFunding = computed(() => route.path.includes('funding'))
 const authStore = useAuthStore()
+
+const onSearchClick = () => { //상수 추가
+  //검색어가 공백이면 이동 안한다고오오오
+  if(!inputQuery.value.trim()) 
+  return
+
+  router.push({
+    name: 'auction_list',
+    query: {q: inputQuery.value }
+  })
+}
+
+onMounted(() => {
+  authStore.checkLogin()
+}) //추가
 </script>
 
 <template class="overflow-x-hidden">
@@ -48,8 +65,13 @@ const authStore = useAuthStore()
 
         <div class="flex-1 max-w-md mx-8 hidden md:block">
           <div class="relative w-full flex items-center">
-            <span class="absolute left-4 text-gray-400 text-xs">🔍</span>
+            <button @click="onSearchClick"
+            type="button"
+            aria-label="검색 실행"
+            class="absolute left-4 text-gray-400 text-xs">🔍</button>
             <input
+              v-model="inputQuery"
+              @keyup.enter="onSearchClick"
               type="text"
               placeholder="어떤 보석을 찾으시나요?"
               class="w-full bg-gray-50 border border-gray-100 rounded-full py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-[#A39382] transition-all placeholder:text-gray-300"
@@ -109,8 +131,14 @@ const authStore = useAuthStore()
 
         <div class="flex-1 max-w-md mx-8 hidden md:block">
           <div class="relative flex items-center">
-            <span class="absolute left-4 text-gray-400 text-xs">🔍</span>
+            <button 
+            @click="onSearchClick"
+            type="button"
+            aria-label="검색 실행"
+            class="absolute left-4 text-gray-400 text-xs">🔍</button>
             <input
+              v-model="inputQuery"
+              @keyup.enter="onSearchClick"
               type="text"
               placeholder="어떤 보석을 찾으시나요?"
               class="w-full bg-gray-50 border border-gray-100 rounded-full py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-[#A39382] transition-all placeholder:text-gray-300"

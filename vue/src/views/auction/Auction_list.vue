@@ -1,32 +1,81 @@
 <script setup>
-import { reactive, computed, ref } from 'vue'
+import { reactive, computed, ref, watch, onMounted } from 'vue' //watch, onMounted 추가
+import { useRoute } from 'vue-router'//추가
 import api from '@/api/auction'
+
+const route = useRoute()//추가
+const originList = ref([]) //추가
 
 const auction_list = reactive([])
 
 const getlist = async () => {
   const res = await api.auctionList()
-  console.log(res.result)
-
+  //console.log(res.result)
   if (res.code == 2000) {
-    auction_list.push(...res.result)
+    //auction_list.push(...res.result)
+    originList.value = res.result //추가
+    applyFilter() //추가
   } else {
     alert('list.json 파일을 불러오지 못하였음')
   }
 }
-getlist()
+//getlist()
 
+// 상수 전체 추
+const applyFilter = () => {
+  const searchQuery = route.query.q //주소창에서 q 검색어 읽기?
+  let result = [...originList.value]
+
+  if (searchQuery) {
+    result = result.filter(item => 
+      item.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+      item.brand.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  }
+
+  //추가
+
+if (currentFilter.value === 'all') {
+    result.sort((a, b) => a.idx - b.idx)
+  } else if (currentFilter.value === 'price') {
+    result.sort((a, b) => a.price - b.price)
+  } else if (currentFilter.value === 'imminent') {
+    result.sort((a, b) => a.days - b.days)
+  }
+
+//추가
+auction_list.splice(0, auction_list.length, ...result)
+  currentPage.value = 1 
+}
+
+//test 주소창의 검색어(q)가 바뀔 때마다 감시해서 리스트를 바꿉니다 (연속 검색 대응)
+watch(() => route.query.q, () => {
+  applyFilter()
+})
+
+//test
+onMounted(() => {
+  getlist()
+})
+
+//test
 const currentFilter = ref('all')
 const currentItem = () => {
-  if (currentFilter.value === 'all') {
-    auction_list.sort((a, b) => a.idx - b.idx)
-  } else if (currentFilter.value === 'price') {
-    auction_list.sort((a, b) => a.price - b.price)
-  } else if (currentFilter.value === 'imminent') {
-    auction_list.sort((a, b) => a.days - b.days)
-  }
-  return auction_list
+  applyFilter() // 정렬을 바꿔도 이 함수를 실행
 }
+
+
+//const currentFilter = ref('all')
+//const currentItem = () => {
+//  if (currentFilter.value === 'all') {
+//    auction_list.sort((a, b) => a.idx - b.idx)
+//  } else if (currentFilter.value === 'price') {
+//    auction_list.sort((a, b) => a.price - b.price)
+//  } else if (currentFilter.value === 'imminent') {
+//    auction_list.sort((a, b) => a.days - b.days)
+//  }
+//  return auction_list
+//}
 
 const currentPage = ref(1)
 
