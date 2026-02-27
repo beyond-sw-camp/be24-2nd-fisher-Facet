@@ -1,4 +1,20 @@
-<script setup></script>
+<script setup>
+import { reactive } from 'vue';
+import api from '@/api/user/index.js';
+
+const regForm = reactive({
+  "category": " ",
+  "email":"",
+  "title":"",
+  "contents":""
+})
+
+const reg = async () =>{
+  const res = await api.reg(regForm)
+  console.log(res.data)
+}
+
+</script>
 
 <template>
   <main class="max-w-[1200px] mx-auto px-6 py-12">
@@ -116,8 +132,8 @@
             <div class="space-y-6">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-2">
-                  <label class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Category</label>
-                  <select
+                  <label  class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Category</label>
+                  <select v-model="regForm.category"
                     class="w-full bg-white border border-gray-200 rounded-lg px-4 py-4 text-sm focus:border-[#A39382] outline-none cursor-pointer">
                     <option>결제 및 입찰</option>
                     <option>배송 및 환불</option>
@@ -127,22 +143,22 @@
                 </div>
                 <div class="space-y-2">
                   <label class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Email Address</label>
-                  <input type="email" placeholder="example@facet.com"
+                  <input v-model="regForm.email" type="email" placeholder="example@facet.com"
                     class="w-full bg-white border border-gray-200 rounded-lg px-4 py-4 text-sm focus:border-[#A39382] outline-none" />
                 </div>
               </div>
               <div class="space-y-2">
                 <label class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Subject</label>
-                <input type="text" placeholder="문의 제목을 입력하세요"
+                <input v-model="regForm.title" type="text" placeholder="문의 제목을 입력하세요"
                   class="w-full bg-white border border-gray-200 rounded-lg px-4 py-4 text-sm focus:border-[#A39382] outline-none" />
               </div>
               <div class="space-y-2">
                 <label class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Message Details</label>
-                <textarea rows="10" placeholder="구체적인 내용을 입력해 주세요."
+                <textarea v-model="regForm.contents" rows="10" placeholder="구체적인 내용을 입력해 주세요."
                   class="w-full bg-white border border-gray-200 rounded-lg px-4 py-4 text-sm focus:border-[#A39382] outline-none resize-none"></textarea>
               </div>
             </div>
-            <button type="submit"
+            <button @click="reg(regForm)" type="submit"
               class="w-full text-black py-5 rounded-lg text-[11px] font-bold uppercase tracking-[0.3em] shadow-lg mt-6 ">
               Send Message
             </button>
