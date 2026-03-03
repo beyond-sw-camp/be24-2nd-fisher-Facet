@@ -1,19 +1,40 @@
 <script setup>
-import { reactive } from 'vue';
+import { reactive, ref , onMounted} from 'vue';
 import api from '@/api/user/index.js';
 
 const regForm = reactive({
   "category": " ",
-  "email":"",
-  "title":"",
-  "contents":""
+  "email": "",
+  "title": "",
+  "contents": ""
 })
 
-const reg = async () =>{
+const askList = ref([])
+
+const list = async () => {
+  const listResult = await api.list()
+  askList.value = listResult.result
+  console.log(listResult.result)
+}
+list()
+
+// 아코디언 토글 상태
+const activeInquiryIndex = ref(null);
+
+const toggleInquiry = (index) => {
+  activeInquiryIndex.value = activeInquiryIndex.value === index ? null : index;
+};
+
+
+const reg = async () => {
   const res = await api.reg(regForm)
   console.log(res.data)
+  alert('문의가 접수되었습니다.')
 }
 
+onMounted(() => {
+list
+})
 </script>
 
 <template>
@@ -132,7 +153,7 @@ const reg = async () =>{
             <div class="space-y-6">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="space-y-2">
-                  <label  class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Category</label>
+                  <label class="text-[10px] font-bold uppercase tracking-widest text-gray-400">Category</label>
                   <select v-model="regForm.category"
                     class="w-full bg-white border border-gray-200 rounded-lg px-4 py-4 text-sm focus:border-[#A39382] outline-none cursor-pointer">
                     <option>결제 및 입찰</option>
@@ -233,63 +254,56 @@ const reg = async () =>{
           </div>
         </div>
       </div>
-      
-      <!-- NEW SECTION: Inquiry List -->
+
       <section>
-        <div class="flex justify-between items-end mb-6 border-b border-gray-100 pb-4 mt-16">
+        <div class="flex justify-between items-end mb-6 border-b border-gray-100 pb-4">
           <div>
             <h2 class="text-xl font-bold mb-2">내 문의 내역</h2>
-            <p class="text-xs text-gray-400">최근 3개월간의 문의 기록입니다.</p>
+            <p class="text-xs text-gray-400">항목을 클릭하여 답변을 확인할 수 있습니다.</p>
           </div>
-          <button class="text-xs font-medium text-gray-500 hover:text-black flex items-center">
-            전체보기
-            <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path d="M9 5l7 7-7 7"></path>
-            </svg>
-          </button>
         </div>
 
         <div class="space-y-4">
-          <!-- Inquiry Item 1 (Completed) -->
-          <div
-            class="group border border-gray-100 rounded-2xl p-6 hover:border-gray-200 transition-all cursor-pointer bg-white">
-            <div class="flex justify-between items-start mb-3">
-              <div class="flex space-x-2 items-center">
-                <span class="status-badge status-completed tracking-tighter">답변 완료</span>
-                <span class="text-[10px] text-gray-400 font-medium">결제 및 입찰</span>
+          <div v-for="(inquiry, index) in askList" :key="index"
+            class="inquiry-item group border border-gray-100 rounded-2xl overflow-hidden transition-all bg-white"
+            :class="{ 'active': activeInquiryIndex === index }" @click="toggleInquiry(index)">
+            <div class="p-6 cursor-pointer flex justify-between items-center">
+              <div class="flex-grow">
+                <div class="flex justify-between items-start mb-3">
+                  <div class="flex space-x-2 items-center">
+                    <span
+                      :class="['status-badge', inquiry.status === 'completed' ? 'status-completed' : 'status-pending']">
+                      {{ inquiry.reply_status === 'true' ? '답변 완료' : '답변 대기' }}
+                    </span>
+                    <span class="text-[10px] text-gray-400 font-medium uppercase tracking-wider">{{ inquiry.category
+                    }}</span>
+                  </div>
+                  <span class="text-[11px] text-gray-300">{{ inquiry.date }}</span>
+                </div>
+                <h4 class="text-sm font-semibold group-hover:text-gray-600 transition">{{ inquiry.title }}</h4>
               </div>
-              <span class="text-[11px] text-gray-300">2024.02.26</span>
+              <svg class="arrow-icon w-5 h-5 text-gray-300 ml-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+              </svg>
             </div>
-            <h4 class="text-sm font-semibold mb-2 group-hover:underline">입찰한 다이아몬드 링의 잔금 결제 방법 문의</h4>
-            <p class="text-xs text-gray-500 line-clamp-1 mb-0">마이페이지에서 카드 결제 시 자꾸 오류가 발생하는데 무통장 입금이 가능한가요...</p>
-          </div>
 
-          <!-- Inquiry Item 2 (Pending) -->
-          <div
-            class="group border border-gray-100 rounded-2xl p-6 hover:border-gray-200 transition-all cursor-pointer bg-white">
-            <div class="flex justify-between items-start mb-3">
-              <div class="flex space-x-2 items-center">
-                <span class="status-badge status-pending tracking-tighter">답변 대기</span>
-                <span class="text-[10px] text-gray-400 font-medium">배송 문의</span>
+            <div class="answer-content">
+              <div class="space-y-4">
+                <div class="bg-white p-4 rounded-lg border border-gray-50">
+                  <p class="text-[10px] font-bold text-gray-400 uppercase mb-2">나의 문의</p>
+                  <p class="text-xs text-gray-600 leading-relaxed">{{ inquiry.contents }}</p>
+                </div>
+                <div v-if="inquiry.status === 'completed'" class="pt-2">
+                  <p class="text-[10px] font-bold text-red-800 uppercase mb-2 flex items-center">
+                    <span class="w-1.5 h-1.5 bg-red-800 rounded-full mr-2"></span>FACET Concierge Answer
+                  </p>
+                  <p class="text-xs text-gray-700 leading-relaxed" v-html="inquiry.answer"></p>
+                </div>
+                <div v-else class="p-2">
+                  <p class="text-xs text-gray-400 italic">담당 컨시어지가 문의 내용을 확인 중입니다.</p>
+                </div>
               </div>
-              <span class="text-[11px] text-gray-300">2024.02.27</span>
             </div>
-            <h4 class="text-sm font-semibold mb-2 group-hover:underline">배송지 변경 요청 (주문번호 #FCT-2024-002)</h4>
-            <p class="text-xs text-gray-500 line-clamp-1 mb-0">이사 일정 때문에 이번 주 금요일까지 배송지를 수정하고 싶습니다.</p>
-          </div>
-
-          <!-- Inquiry Item 3 (Completed) -->
-          <div
-            class="group border border-gray-100 rounded-2xl p-6 hover:border-gray-200 transition-all cursor-pointer bg-white">
-            <div class="flex justify-between items-start mb-3">
-              <div class="flex space-x-2 items-center">
-                <span class="status-badge status-completed tracking-tighter">답변 완료</span>
-                <span class="text-[10px] text-gray-400 font-medium">상품 상태 문의</span>
-              </div>
-              <span class="text-[11px] text-gray-300">2024.02.20</span>
-            </div>
-            <h4 class="text-sm font-semibold mb-2 group-hover:underline">GIA 감정서 진위 확인 부탁드립니다.</h4>
-            <p class="text-xs text-gray-500 line-clamp-1 mb-0">업로드해주신 사진 속 감정서 번호가 명확히 보이지 않아 재문의 남깁니다.</p>
           </div>
         </div>
       </section>
@@ -384,5 +398,32 @@ details summary::-webkit-details-marker {
 
 html {
   scroll-behavior: smooth;
+}
+
+/* Accordion Animation */
+.answer-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out, padding 0.3s ease;
+  background-color: #fafafa;
+}
+
+.inquiry-item.active .answer-content {
+  max-height: 500px;
+  /* 충분한 높이 */
+  padding: 24px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.inquiry-item.active {
+  border-color: #333;
+}
+
+.arrow-icon {
+  transition: transform 0.3s ease;
+}
+
+.inquiry-item.active .arrow-icon {
+  transform: rotate(180deg);
 }
 </style>

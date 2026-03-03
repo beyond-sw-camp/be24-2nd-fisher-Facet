@@ -20,5 +20,10 @@ const reg = async (regForm)=>{
   return res;
 }
 
+// 사용자가 남긴 문의 내역을 받아오기 
+const list = async () =>{
+  const res = await api.get('/ask/list')
+  return res.data;
+}
 
-export default { login, signup , reg}
+export default { login, signup , reg, list}
