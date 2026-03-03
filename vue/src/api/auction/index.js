@@ -1,9 +1,8 @@
 import api from '@/plugins/axiosinterceptor'
 
 // get은 가져오기, post은 보낼때
-const auctionList = async () => {
-  const res = await api.get('/json/funding_list')
-  console.log('index', res)
+const auctionList = async (page) => {
+  const res = await api.get(`/auction/list?page=${page}`)
   return res.data
 }
 
