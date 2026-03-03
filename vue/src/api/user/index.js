@@ -13,4 +13,17 @@ const signup = async (req) => {
   return res
 }
 
-export default { login, signup }
+// 문의 요청후 응답 받기 
+const reg = async (regForm)=>{
+  const res = await api.post('/ask/reg', regForm)
+  console.log(res)
+  return res;
+}
+
+// 사용자가 남긴 문의 내역을 받아오기 
+const list = async () =>{
+  const res = await api.get('/ask/list')
+  return res.data;
+}
+
+export default { login, signup , reg, list}
