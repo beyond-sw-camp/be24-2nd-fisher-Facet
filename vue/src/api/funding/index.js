@@ -7,7 +7,7 @@ const mainfundList = async () => {
 }
 
 const fundescList = async () => {
-  const res = await api.get('/json/funding_list')
+  const res = await api.get('/funding/funding_list')
   console.log('index', res)
   return res.data
 }

@@ -1,12 +1,12 @@
 <script setup>
 import { reactive, computed, ref } from 'vue'
-import api from '@/api/auction'
+import api from '@/api/funding'
 
 const funding_list = reactive([])
 
 const getlist = async () => {
-  const res = await api.auctionList()
-  console.log(res.result)
+  const res = await api.mainfundList()
+  console.log("res",res.result)
 
   if (res.code == 2000) {
     funding_list.push(...res.result)
