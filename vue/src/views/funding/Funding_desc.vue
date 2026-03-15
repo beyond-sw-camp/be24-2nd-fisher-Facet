@@ -89,6 +89,21 @@ const calculateTimeLeft = () => {
   timeLeft.value = `${String(days).padStart(2, '0')}일 ${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`
 }
 
+// 현재 퍼센트 계산 
+const calculatedPercent = computed(() => {
+  // 데이터가 없거나 목표 금액이 0인 경우 방어 로직
+  if (!fundingDesc.value || !fundingDesc.value.targetPrice || fundingDesc.value.targetPrice === 0) {
+    return 0;
+  }
+
+  // 현재 모인 금액 (DB 필드명이 'raised'라고 가정)
+  const raised = fundingDesc.value.targetPrice; // 실제 DB에서 넘어오는 '현재 모금액' 필드명으로 수정하세요.
+  // 목표 금액 (DB 필드명이 'goalPrice'라고 가정)
+  const goal = 10800000; // 이 부분도 DB 필드(fundingDesc.value.goalPrice)로 교체 가능합니다.
+
+  return Math.floor((raised / goal) * 100);
+});
+
 onMounted(() => {
   getDesc()
   getDetail()
@@ -327,7 +342,7 @@ onUnmounted(() => {
               <p class="text-[10px] text-gray-400 uppercase tracking-[0.2em] mb-2 font-medium">
                 Funding Progress
               </p>
-              <p class="text-3xl font-bold accent-text" id="percent-text">{{ fundingDesc.percent }} %</p>
+              <p class="text-3xl font-bold accent-text" id="percent-text">{{ calculatedPercent }} %</p>
             </div>
             <div class="text-right">
               <p class="text-[10px] text-gray-400 uppercase tracking-[0.2em] mb-2 font-medium">
@@ -342,7 +357,7 @@ onUnmounted(() => {
           <div>
             <div class="w-full h-[4px] rounded-full overflow-hidden bg-gray-100">
               <div id="progress-fill" class="h-full" :style="{
-                width: Math.min(fundingDesc.percent, 100) + '%',
+                width: Math.min(calculatedPercent, 100) + '%',
                 backgroundColor: '#a39382'
               }"></div>
             </div>
