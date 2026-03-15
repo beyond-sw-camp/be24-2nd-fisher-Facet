@@ -3,17 +3,24 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import api from '@/api/funding'
 
-const fundingDesc = ref()
-const fundingDetail = ref()
+const fundingDesc = ref()   // 해당 상품 리스트 
+const fundingDetail = ref() // 추천 상품 리스트
 const route = useRoute()
 const Quantity = ref(1)
 
-const getDetail = async () => {
+const getDesc = async () => {
   const idx = route.params.idx
-  const res = await api.getFundingDetail(idx)
-  console.log(res.result)
+  const res = await api.FundingDesc(idx)
+  // console.log(res.result)
   fundingDesc.value = res.result
-  fundingDetail.value = fundingDesc.value.rewards
+
+}
+
+const getDetail = async () => {
+  const res = await api.fundingDetail()
+  // console.log(res)
+  fundingDetail.value = res.result
+  console.log("fundingDesc", fundingDetail.value)
 }
 
 const addQuantity = () => {
@@ -21,11 +28,13 @@ const addQuantity = () => {
 }
 
 const minusQuantity = () => {
-  if(Quantity.value > 1)
+  if (Quantity.value > 1)
     Quantity.value = Quantity.value - 1
 }
 
+
 onMounted(() => {
+  getDesc()
   getDetail()
 })
 </script>
@@ -39,30 +48,19 @@ onMounted(() => {
     </nav>
 
     <!-- Cover -->
-    <section
-      class="relative overflow-hidden rounded-md border border-gray-100 shadow-sm h-[260px] md:h-[340px] mb-10"
-    >
-      <img
-        src="https://images.unsplash.com/photo-1617038220319-276d3cfab638?auto=format&fit=crop&w=1800&q=80"
-        alt="Funding Cover"
-        class="w-full h-full object-cover"
-      />
+    <section class="relative overflow-hidden rounded-md border border-gray-100 shadow-sm h-[260px] md:h-[340px] mb-10">
+      <img src="https://images.unsplash.com/photo-1617038220319-276d3cfab638?auto=format&fit=crop&w=1800&q=80"
+        alt="Funding Cover" class="w-full h-full object-cover" />
       <div class="absolute inset-0 banner-gradient"></div>
 
       <div class="absolute left-6 md:left-10 bottom-8 md:bottom-10 text-white max-w-2xl">
         <div class="flex items-center space-x-2 mb-4">
           <span
-            class="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] uppercase tracking-widest"
-            >Handmade</span
-          >
-          <span class="px-3 py-1 bg-[#A39382] rounded-full text-[10px] uppercase tracking-widest"
-            >Funding</span
-          >
-          <span
-            class="px-3 py-1 bg-black/35 backdrop-blur-md rounded-full text-[10px] uppercase tracking-widest"
-            id="status-badge"
-            >Ongoing</span
-          >
+            class="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[10px] uppercase tracking-widest">Handmade</span>
+          <span class="px-3 py-1 bg-[#A39382] rounded-full text-[10px] uppercase tracking-widest">{{
+            fundingDesc.category }}</span>
+          <span class="px-3 py-1 bg-black/35 backdrop-blur-md rounded-full text-[10px] uppercase tracking-widest"
+            id="status-badge">{{ fundingDesc.brand }}</span>
         </div>
         <h1 class="text-3xl md:text-5xl font-light font-serif-luxury italic leading-tight">
           {{ fundingDesc.name }}
@@ -77,90 +75,45 @@ onMounted(() => {
     <section class="grid grid-cols-1 lg:grid-cols-12 gap-10">
       <!-- Left: Story / Detail -->
       <div class="lg:col-span-8">
-        <!-- ✅ Gallery만 A안으로 교체 (정사각 메인 + 하단 필름스트립) -->
         <section class="mb-10">
           <div class="border border-gray-100 bg-gray-50 rounded-md overflow-hidden">
             <div class="aspect-square w-full">
-              <img
-                id="main-img"
+              <img id="main-img"
                 src="https://images.unsplash.com/photo-1617038220319-276d3cfab638?auto=format&fit=crop&w=1400&q=80"
-                class="w-full h-full object-cover"
-                alt="Main"
-              />
+                class="w-full h-full object-cover" alt="Main" />
             </div>
           </div>
 
           <div class="mt-4 flex items-center gap-3 overflow-x-auto no-scrollbar pb-2">
-            <button
-              class="thumb shrink-0 border border-[#A39382] rounded-md overflow-hidden w-24 aspect-square bg-white"
-              data-src="https://images.unsplash.com/photo-1617038220319-276d3cfab638?auto=format&fit=crop&w=1400&q=80"
-            >
-              <img
-                src="https://images.unsplash.com/photo-1617038220319-276d3cfab638?auto=format&fit=crop&w=240&q=80"
-                class="w-full h-full object-cover"
-                alt="Thumb 1"
-              />
-            </button>
+            <div v-for="img in fundingDesc.fundingImgList">
+              <button
+                class="thumb shrink-0 border border-[#A39382] rounded-md overflow-hidden w-24 aspect-square bg-white"
+                :data-src="img.imgDetail">
+                <img :src="img.imgDetail" class="w-full h-full object-cover" alt="Thumb 1" />
+              </button>
+            </div>
 
-            <button
-              class="thumb shrink-0 border border-gray-100 rounded-md overflow-hidden w-24 aspect-square bg-white"
-              data-src="https://images.unsplash.com/photo-1515562141207-7a18b5ce7142?auto=format&fit=crop&w=1400&q=80"
-            >
-              <img
-                src="https://images.unsplash.com/photo-1515562141207-7a18b5ce7142?auto=format&fit=crop&w=240&q=80"
-                class="w-full h-full object-cover"
-                alt="Thumb 2"
-              />
-            </button>
-
-            <button
-              class="thumb shrink-0 border border-gray-100 rounded-md overflow-hidden w-24 aspect-square bg-white"
-              data-src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=1400&q=80"
-            >
-              <img
-                src="https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=240&q=80"
-                class="w-full h-full object-cover"
-                alt="Thumb 3"
-              />
-            </button>
-
-            <button
-              class="thumb shrink-0 border border-gray-100 rounded-md overflow-hidden w-24 aspect-square bg-white"
-              data-src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=1400&q=80"
-            >
-              <img
-                src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=240&q=80"
-                class="w-full h-full object-cover"
-                alt="Thumb 4"
-              />
-            </button>
           </div>
         </section>
 
         <!-- Tabs -->
         <div class="flex border-b border-gray-100 mb-6">
-          <button
-            class="tab px-6 py-3 text-[11px] font-bold tab-active uppercase tracking-[0.2em]"
-            data-tab="story"
-          >
+          <button class="tab px-6 py-3 text-[11px] font-bold tab-active uppercase tracking-[0.2em]" data-tab="story">
             Story
           </button>
           <button
             class="tab px-6 py-3 text-[11px] font-medium text-gray-400 hover:text-gray-600 uppercase tracking-[0.2em] transition-colors"
-            data-tab="maker"
-          >
+            data-tab="maker">
             Maker
           </button>
           <button
             class="tab px-6 py-3 text-[11px] font-medium text-gray-400 hover:text-gray-600 uppercase tracking-[0.2em] transition-colors"
-            data-tab="process"
-          >
+            data-tab="process">
             Process
           </button>
           <button
             class="tab px-6 py-3 text-[11px] font-medium text-gray-400 hover:text-gray-600 uppercase tracking-[0.2em] transition-colors"
-            data-tab="shipping"
-          >
+            data-tab="shipping">
             Shipping
           </button>
         </div>
@@ -171,21 +124,19 @@ onMounted(() => {
             <div class="p-6 border border-gray-100 rounded-md bg-white">
               <p class="text-[10px] text-gray-400 uppercase tracking-[0.2em] mb-2">Key Point</p>
               <p class="text-sm text-gray-700 leading-relaxed font-light">
-                100% 수작업 세공으로 동일한 패턴이 없는
-                <span class="accent-text font-medium">원-오프(One-off)</span> 텍스처를 구현합니다.
+                {{ fundingDesc.fundingStory.keyPoint }}
               </p>
             </div>
             <div class="p-6 border border-gray-100 rounded-md bg-white">
               <p class="text-[10px] text-gray-400 uppercase tracking-[0.2em] mb-2">Material</p>
               <p class="text-sm text-gray-700 leading-relaxed font-light">
-                925 Silver / 14K Gold Plated 옵션, 원석은 프로젝트별로 엄선해 사용합니다.
+                {{ fundingDesc.fundingStory.material }}
               </p>
             </div>
             <div class="p-6 border border-gray-100 rounded-md bg-white">
               <p class="text-[10px] text-gray-400 uppercase tracking-[0.2em] mb-2">Handmade</p>
               <p class="text-sm text-gray-700 leading-relaxed font-light">
-                주문(펀딩) 종료 후 제작 시작. 제작 기간에 맞춰
-                <span class="accent-text font-medium">개별 검수</span> 후 발송합니다.
+                {{ fundingDesc.fundingStory.handMade }}
               </p>
             </div>
           </section>
@@ -195,13 +146,7 @@ onMounted(() => {
               Project Story
             </h2>
             <p class="text-sm text-gray-600 leading-relaxed font-light">
-              Celestial Rose는 “빛이 머무는 자리”를 모티브로 한 수공예 주얼리입니다. 장인이 원석의
-              결을 관찰한 뒤, 금속을 한 번에 찍어내지 않고 여러 단계로 다듬어 빛의 확산이 가장
-              아름답게 드러나는 각도를 찾습니다.
-            </p>
-            <p class="text-sm text-gray-600 leading-relaxed font-light">
-              대량 생산이 아닌, 펀딩을 통해 필요한 수량만 제작해 불필요한 재고를 줄이고 제작 과정의
-              품질에 더 많은 시간을 투자합니다.
+              {{ fundingDesc.fundingStory.projectStory }}
             </p>
           </section>
 
@@ -231,33 +176,28 @@ onMounted(() => {
             <div class="flex items-center justify-between mb-6">
               <div>
                 <p class="text-[10px] text-gray-400 uppercase tracking-[0.2em] mb-2">Maker</p>
-                <h2 class="text-2xl font-light text-gray-900">Atelier Park</h2>
+                <h2 class="text-2xl font-light text-gray-900">{{ fundingDesc.brand }}</h2>
               </div>
-              <button
-                class="px-5 py-2 text-[11px] font-bold tracking-widest uppercase ghost-btn rounded-sm"
-              >
-                Follow
-              </button>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div class="p-5 bg-gray-50 rounded-md border border-gray-100">
                 <p class="text-[10px] text-gray-400 uppercase tracking-[0.2em] mb-2">Experience</p>
-                <p class="text-sm text-gray-700 font-light">금속 공예 7년 / 주얼리 제작 5년</p>
+                <p class="text-sm text-gray-700 font-light">{{ fundingDesc.fundingMaker.experience }}</p>
               </div>
               <div class="p-5 bg-gray-50 rounded-md border border-gray-100">
                 <p class="text-[10px] text-gray-400 uppercase tracking-[0.2em] mb-2">Style</p>
-                <p class="text-sm text-gray-700 font-light">미니멀 & 클래식, 자연 텍스처</p>
+                <p class="text-sm text-gray-700 font-light">{{ fundingDesc.fundingMaker.style }}</p>
               </div>
               <div class="p-5 bg-gray-50 rounded-md border border-gray-100">
                 <p class="text-[10px] text-gray-400 uppercase tracking-[0.2em] mb-2">Promise</p>
-                <p class="text-sm text-gray-700 font-light">전량 수작업 · 개별 검수 · 안전 포장</p>
+                <p class="text-sm text-gray-700 font-light">{{ fundingDesc.fundingMaker.promise }}</p>
               </div>
             </div>
 
             <div class="mt-8 text-sm text-gray-600 leading-relaxed font-light">
               <p>
-                “작품이 되는 순간은, 재료의 작은 결을 읽어내는 시간에서 시작됩니다.” Atelier Park는
+                “작품이 되는 순간은, 재료의 작은 결을 읽어내는 시간에서 시작됩니다.” {{ fundingDesc.brand }}는
                 수공예의 결을 살리는 제작 방식으로, 똑같은 제품이 반복되지 않도록 각 작품에 미세한
                 변주를 남깁니다.
               </p>
@@ -272,44 +212,15 @@ onMounted(() => {
             </h2>
 
             <div class="space-y-4">
-              <div class="flex items-start space-x-4">
+              <div v-for="Process in fundingDesc.fundingProcessList" class="flex items-start space-x-4">
                 <div
-                  class="w-8 h-8 rounded-full accent-bg text-white flex items-center justify-center text-sm font-bold"
-                >
-                  1
+                  class="w-8 h-8 rounded-full accent-bg text-white flex items-center justify-center text-sm font-bold">
+                  {{ Process.idx }}
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-900">디자인 확정 & 재료 선별</p>
+                  <p class="text-sm font-medium text-gray-900">{{ Process.title }}</p>
                   <p class="text-sm text-gray-600 font-light leading-relaxed mt-1">
-                    원석 결/색감을 기준으로 페어링하고, 금속 도금 옵션에 맞춰 공정을 확정합니다.
-                  </p>
-                </div>
-              </div>
-
-              <div class="flex items-start space-x-4">
-                <div
-                  class="w-8 h-8 rounded-full accent-bg text-white flex items-center justify-center text-sm font-bold"
-                >
-                  2
-                </div>
-                <div>
-                  <p class="text-sm font-medium text-gray-900">세공(수작업)</p>
-                  <p class="text-sm text-gray-600 font-light leading-relaxed mt-1">
-                    절삭/연마/세팅을 여러 차례 반복해 광택과 내구성을 확보합니다.
-                  </p>
-                </div>
-              </div>
-
-              <div class="flex items-start space-x-4">
-                <div
-                  class="w-8 h-8 rounded-full accent-bg text-white flex items-center justify-center text-sm font-bold"
-                >
-                  3
-                </div>
-                <div>
-                  <p class="text-sm font-medium text-gray-900">검수 & 패키징</p>
-                  <p class="text-sm text-gray-600 font-light leading-relaxed mt-1">
-                    마감 품질/도금 균일도/스크래치 여부를 점검하고 안전 포장 후 발송합니다.
+                    {{ Process.contents }}
                   </p>
                 </div>
               </div>
@@ -323,9 +234,7 @@ onMounted(() => {
               Shipping & Policy
             </h2>
 
-            <div
-              class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-600 font-light leading-relaxed"
-            >
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-gray-600 font-light leading-relaxed">
               <div class="p-6 bg-gray-50 rounded-md border border-gray-100">
                 <p class="text-[11px] uppercase tracking-[0.2em] text-gray-400 mb-2">
                   Estimated Delivery
@@ -365,7 +274,7 @@ onMounted(() => {
               <p class="text-[10px] text-gray-400 uppercase tracking-[0.2em] mb-2 font-medium">
                 Funding Progress
               </p>
-              <p class="text-3xl font-bold accent-text" id="percent-text">82%</p>
+              <p class="text-3xl font-bold accent-text" id="percent-text">{{ fundingDesc.percent }}</p>
             </div>
             <div class="text-right">
               <p class="text-[10px] text-gray-400 uppercase tracking-[0.2em] mb-2 font-medium">
@@ -379,12 +288,16 @@ onMounted(() => {
 
           <div>
             <div class="w-full h-[4px] rounded-full overflow-hidden bg-gray-100">
-              <div id="progress-fill" class="h-full" style="width: 82%; background: #a39382"></div>
+              <div id="progress-fill" class="h-full" :style="{
+                width: Math.min(fundingDesc.percent, 100) + '%',
+                backgroundColor: '#a39382'
+              }"></div>
             </div>
             <div class="flex justify-between mt-3 text-sm">
               <div class="space-x-2">
                 <span class="text-gray-400 text-[11px]">모인 금액</span>
-                <span class="text-gray-900 font-medium" id="raised">₩ 8,900,000</span>
+                <span class="text-gray-900 font-medium" id="raised">
+                  ₩{{ Number(fundingDesc.targetPrice).toLocaleString() }}</span>
               </div>
               <div class="space-x-2">
                 <span class="text-gray-400 text-[11px]">목표</span>
@@ -394,24 +307,20 @@ onMounted(() => {
             <div class="flex justify-between mt-2 text-sm">
               <div class="space-x-2">
                 <span class="text-gray-400 text-[11px]">서포터</span>
-                <span class="text-gray-900 font-medium" id="supporters">214명</span>
+                <span class="text-gray-900 font-medium" id="supporters">{{ fundingDesc.supporters }}명</span>
               </div>
               <div class="space-x-2">
                 <span class="text-gray-400 text-[11px]">종료</span>
-                <span class="text-gray-900 font-medium">01.12 18:00</span>
+                <span class="text-gray-900 font-medium">{{ fundingDesc.endDays }}</span>
               </div>
             </div>
           </div>
 
           <div class="flex space-x-2 pt-1">
-            <button
-              class="flex-1 py-3 text-[11px] font-bold tracking-widest uppercase ghost-btn rounded-sm"
-            >
+            <button class="flex-1 py-3 text-[11px] font-bold tracking-widest uppercase ghost-btn rounded-sm">
               ❤️ 위시리스트
             </button>
-            <button
-              class="flex-1 py-3 text-[11px] font-bold tracking-widest uppercase ghost-btn rounded-sm"
-            >
+            <button class="flex-1 py-3 text-[11px] font-bold tracking-widest uppercase ghost-btn rounded-sm">
               🔗 공유
             </button>
           </div>
@@ -423,11 +332,9 @@ onMounted(() => {
             </p>
           </div>
 
-          <button
-            id="support-btn"
-            class="w-full py-4 primary-btn font-bold text-xs tracking-[0.3em] uppercase rounded-sm disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled
-          >
+          <!-- ✅ 첫 번째 버튼 수정: 색상 강제 지정 -->
+          <button id="support-btn"
+            class="w-full py-4 bg-[#9B8A7E] text-white font-bold text-xs tracking-[0.3em] uppercase rounded-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#8e7f74] transition-colors">
             Support this Project
           </button>
 
@@ -443,28 +350,23 @@ onMounted(() => {
           </div>
 
           <div class="space-y-4 max-h-[420px] overflow-auto pr-1 no-scrollbar">
-            <button
-              v-for="item in fundingDetail"
-              class="reward reward-card w-full text-left rounded-md p-5"
-              data-title="{{item.name}}"
-              data-price="{{item.price}}"
-              data-left="{{ item.stockQuantity }}"
-            >
+            <button class="reward reward-card w-full text-left rounded-md p-5"
+              v-for="item in fundingDesc.fundingRewardsList">
               <div class="flex items-start justify-between">
                 <div>
                   <p class="text-[10px] uppercase tracking-[0.2em] text-gray-400 mb-2">
                     Option {{ item.idx }}
                   </p>
-                  <p class="text-sm font-bold text-gray-900">{{ item.name }}</p>
+                  <p class="text-sm font-bold text-gray-900">{{ item.title }}</p>
                   <p class="text-[12px] text-gray-500 mt-2 font-light leading-relaxed">
-                    {{ item.desc }}
+                    {{ item.contents }}
                   </p>
                 </div>
                 <div class="text-right ml-4">
                   <p class="text-sm font-bold accent-text">
                     ₩{{ Number(item.price).toLocaleString() }}
                   </p>
-                  <p class="text-[11px] text-gray-400 mt-1">수량: {{ item.stockQuantity }}</p>
+                  <p class="text-[11px] text-gray-400 mt-1">수량: {{ item.stock }}</p>
                 </div>
               </div>
             </button>
@@ -475,25 +377,14 @@ onMounted(() => {
             <div class="flex items-center justify-between">
               <p class="text-[11px] uppercase tracking-[0.2em] text-gray-400">Quantity</p>
               <div class="flex items-center space-x-2">
-                <button
-                  @click="minusQuantity()"
-                  id="qty-minus"
-                  class="w-9 h-9 ghost-btn rounded-sm flex items-center justify-center"
-                >
+                <button @click="minusQuantity()" id="qty-minus"
+                  class="w-9 h-9 ghost-btn rounded-sm flex items-center justify-center">
                   −
                 </button>
-                <input
-                  id="qty"
-                  type="number"
-                  :min="1"
-                  :value="Quantity"
-                  class="w-14 text-center border border-gray-100 rounded-sm py-2 focus:outline-none focus:border-[#A39382]"
-                />
-                <button
-                  @click="addQuantity()"
-                  id="qty-plus"
-                  class="w-9 h-9 ghost-btn rounded-sm flex items-center justify-center"
-                >
+                <input id="qty" type="number" :min="1" :value="Quantity"
+                  class="w-14 text-center border border-gray-100 rounded-sm py-2 focus:outline-none focus:border-[#A39382]" />
+                <button @click="addQuantity()" id="qty-plus"
+                  class="w-9 h-9 ghost-btn rounded-sm flex items-center justify-center">
                   +
                 </button>
               </div>
@@ -504,11 +395,9 @@ onMounted(() => {
               <p class="text-lg font-bold accent-text" id="total">₩ 0</p>
             </div>
 
-            <button
-              id="support-btn-2"
-              class="w-full py-4 primary-btn font-bold text-xs tracking-[0.3em] uppercase rounded-sm disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled
-            >
+            <!-- ✅ 두 번째 버튼 수정: 색상 강제 지정 -->
+            <button id="support-btn-2"
+              class="w-full py-4 bg-[#9B8A7E] text-white font-bold text-xs tracking-[0.3em] uppercase rounded-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#8e7f74] transition-colors">
               Support Now
             </button>
 
@@ -520,6 +409,32 @@ onMounted(() => {
         </div>
       </aside>
     </section>
+
+    <section class="mt-24">
+      <div class="flex justify-between items-end mb-8">
+        <h2 class="text-2xl font-bold">함께 보면 좋은 수공예 펀딩</h2>
+        <RouterLink :to="{ name: 'funding_list' }">
+          <button class="text-sm text-gray-400 hover:text-black transition">더보기</button>
+        </RouterLink>
+        
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12">
+        <div v-for="product in fundingDetail.fundingList" class="group cursor-pointer">
+          <div class="aspect-video overflow-hidden bg-gray-100 mb-4 relative rounded-md">
+            <img :src="product.img"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" alt="Related">
+            <div class="absolute top-3 left-3">
+              <span
+                class="bg-[#A39382] text-white px-2 py-0.5 text-[10px] font-bold rounded-sm uppercase">Handmade</span>
+            </div>
+          </div>
+          <h3 class="text-md font-bold leading-snug group-hover:text-[#A39382] transition-colors line-clamp-2">
+            {{ product.brand }} — {{ product.name }}</h3>
+          <p class="text-[12px] text-gray-400 mt-2">{{ product.category }} | {{ product.percent }}% 달성</p>
+        </div>
+      </div>
+    </section>
   </main>
 </template>
 
@@ -528,7 +443,8 @@ onMounted(() => {
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Cormorant+Garamond:ital,wght@0,300;0,500;1,300&family=Noto+Sans+KR:wght@100;300;400;500;700&display=swap');
 
 :root {
-  --accent-color: #a39382;
+  /* ✅ CSS 변수도 동일한 색상으로 업데이트 */
+  --accent-color: #9B8A7E;
   --accent-hover: #8e7f70;
   --bg-light: #ffffff;
   --text-main: #1a1a1a;
@@ -546,6 +462,7 @@ body {
 .font-serif-luxury {
   font-family: 'Cormorant Garamond', serif;
 }
+
 .luxury-font {
   font-family: 'Cinzel', serif;
 }
@@ -580,14 +497,16 @@ body {
   color: var(--accent-color);
 }
 
+/* ✅ primary-btn 색상을 브라운 톤으로 고정 */
 .primary-btn {
-  background: var(--accent-color);
+  background: #9B8A7E;
   color: #fff;
   transition: all 0.2s ease;
 }
 
 .primary-btn:hover {
   opacity: 0.92;
+  background: #8e7f74;
 }
 
 .ghost-btn {
