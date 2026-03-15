@@ -8,6 +8,10 @@ const fundingDetail = ref() // 추천 상품 리스트
 const route = useRoute()
 const Quantity = ref(1)
 
+// [추가] UI 상태 관리를 위한 변수들
+const activeTab = ref('story')      // 현재 선택된 탭 (story, maker, process, shipping)
+const selectedReward = ref(null)    // 사용자가 클릭한 리워드 객체
+
 const getDesc = async () => {
   const idx = route.params.idx
   const res = await api.FundingDesc(idx)
@@ -30,6 +34,17 @@ const addQuantity = () => {
 const minusQuantity = () => {
   if (Quantity.value > 1)
     Quantity.value = Quantity.value - 1
+}
+
+// [추가] 총 금액 계산 로직 (선택된 리워드 가격 * 수량)
+const totalPrice = computed(() => {
+  if (!selectedReward.value) return 0
+  return selectedReward.value.price * Quantity.value
+})
+
+// [추가] 리워드 선택 함수
+const selectReward = (item) => {
+  selectedReward.value = item
 }
 
 
@@ -98,28 +113,14 @@ onMounted(() => {
 
         <!-- Tabs -->
         <div class="flex border-b border-gray-100 mb-6">
-          <button class="tab px-6 py-3 text-[11px] font-bold tab-active uppercase tracking-[0.2em]" data-tab="story">
-            Story
-          </button>
-          <button
-            class="tab px-6 py-3 text-[11px] font-medium text-gray-400 hover:text-gray-600 uppercase tracking-[0.2em] transition-colors"
-            data-tab="maker">
-            Maker
-          </button>
-          <button
-            class="tab px-6 py-3 text-[11px] font-medium text-gray-400 hover:text-gray-600 uppercase tracking-[0.2em] transition-colors"
-            data-tab="process">
-            Process
-          </button>
-          <button
-            class="tab px-6 py-3 text-[11px] font-medium text-gray-400 hover:text-gray-600 uppercase tracking-[0.2em] transition-colors"
-            data-tab="shipping">
-            Shipping
+          <button v-for="tab in ['story', 'maker', 'process', 'shipping']" :key="tab" @click="activeTab = tab" :class="['px-6 py-3 text-[11px] uppercase tracking-[0.2em] transition-colors',
+            activeTab === tab ? 'tab-active font-bold' : 'text-gray-400 font-medium']">
+            {{ tab }}
           </button>
         </div>
 
         <!-- Tab Contents -->
-        <div id="tab-story" class="tab-panel space-y-10">
+        <div v-show="activeTab === 'story'" id="tab-story" class="tab-panel space-y-10">
           <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="p-6 border border-gray-100 rounded-md bg-white">
               <p class="text-[10px] text-gray-400 uppercase tracking-[0.2em] mb-2">Key Point</p>
@@ -140,6 +141,8 @@ onMounted(() => {
               </p>
             </div>
           </section>
+
+
 
           <section class="p-8 border border-gray-100 rounded-md bg-white space-y-5">
             <h2 class="text-xl font-light tracking-[0.25em] uppercase text-gray-900">
@@ -171,7 +174,7 @@ onMounted(() => {
           </section>
         </div>
 
-        <div id="tab-maker" class="tab-panel hidden space-y-10">
+        <div v-show="activeTab === 'maker'" id="tab-maker" class="tab-panel space-y-10">
           <section class="p-8 border border-gray-100 rounded-md bg-white">
             <div class="flex items-center justify-between mb-6">
               <div>
@@ -205,7 +208,7 @@ onMounted(() => {
           </section>
         </div>
 
-        <div id="tab-process" class="tab-panel hidden space-y-10">
+        <div v-show="activeTab === 'process'" id="tab-process" class="tab-panel  space-y-10">
           <section class="p-8 border border-gray-100 rounded-md bg-white space-y-6">
             <h2 class="text-xl font-light tracking-[0.25em] uppercase text-gray-900">
               Making Process
@@ -214,7 +217,7 @@ onMounted(() => {
             <div class="space-y-4">
               <div v-for="Process in fundingDesc.fundingProcessList" class="flex items-start space-x-4">
                 <div
-                  class="w-8 h-8 rounded-full accent-bg text-white flex items-center justify-center text-sm font-bold">
+                  class="w-8 h-8 rounded-full accent-bg text-white flex items-center justify-center text-sm font-bold process-number">
                   {{ Process.idx }}
                 </div>
                 <div>
@@ -228,7 +231,7 @@ onMounted(() => {
           </section>
         </div>
 
-        <div id="tab-shipping" class="tab-panel hidden space-y-10">
+        <div v-show="activeTab === 'shipping'" id="tab-shipping" class="tab-panel  space-y-10">
           <section class="p-8 border border-gray-100 rounded-md bg-white space-y-6">
             <h2 class="text-xl font-light tracking-[0.25em] uppercase text-gray-900">
               Shipping & Policy
@@ -328,7 +331,7 @@ onMounted(() => {
           <div class="pt-2">
             <p class="text-[10px] text-gray-400 uppercase tracking-[0.2em] mb-2">Selected Reward</p>
             <p class="text-sm text-gray-700 font-light" id="selected-reward-text">
-              리워드를 선택해주세요.
+              {{ selectedReward ? selectedReward.title : '리워드를 선택해주세요.' }}
             </p>
           </div>
 
@@ -351,7 +354,8 @@ onMounted(() => {
 
           <div class="space-y-4 max-h-[420px] overflow-auto pr-1 no-scrollbar">
             <button class="reward reward-card w-full text-left rounded-md p-5"
-              v-for="item in fundingDesc.fundingRewardsList">
+              v-for="item in fundingDesc.fundingRewardsList" :key="item.idx" @click="selectReward(item)">
+            
               <div class="flex items-start justify-between">
                 <div>
                   <p class="text-[10px] uppercase tracking-[0.2em] text-gray-400 mb-2">
@@ -392,11 +396,11 @@ onMounted(() => {
 
             <div class="flex items-center justify-between">
               <p class="text-[11px] uppercase tracking-[0.2em] text-gray-400">Total</p>
-              <p class="text-lg font-bold accent-text" id="total">₩ 0</p>
+              <p class="text-lg font-bold accent-text" id="total">₩ {{ totalPrice.toLocaleString() }}</p>
             </div>
 
             <!-- ✅ 두 번째 버튼 수정: 색상 강제 지정 -->
-            <button id="support-btn-2"
+            <button id="support-btn-2" :disabled="!selectedReward"
               class="w-full py-4 bg-[#9B8A7E] text-white font-bold text-xs tracking-[0.3em] uppercase rounded-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-[#8e7f74] transition-colors">
               Support Now
             </button>
@@ -416,7 +420,7 @@ onMounted(() => {
         <RouterLink :to="{ name: 'funding_list' }">
           <button class="text-sm text-gray-400 hover:text-black transition">더보기</button>
         </RouterLink>
-        
+
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-12">
@@ -545,5 +549,27 @@ body {
 ::-webkit-scrollbar-thumb {
   background: var(--accent-color);
   border-radius: 3px;
+}
+
+/* ✅ 시안처럼 번호를 스타일링하기 위한 CSS 추가 */
+.process-number {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background-color: #9B8A7E; /* --accent-color 값 직접 적용 */
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  font-family: 'Cinzel', serif; /* 숫자 폰트 스타일 */
+  margin-top: -2px; /* 제목 텍스트와 높이를 맞추기 위한 미세 조정 */
+}
+
+/* 타블렛/모바일 대응을 위한 미세 조정 */
+@media (max-width: 768px) {
+  .process-item { gap: 1rem; }
+  .process-number { width: 32px; height: 32px; font-size: 14px; }
 }
 </style>
