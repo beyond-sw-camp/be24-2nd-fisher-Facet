@@ -31,7 +31,7 @@ const login = async () => {
 
 // 환경 변수 로드
 
-const kakaoRedirectUri = import.meta.env.VITE_KAKAO_REDIRECT_URI;
+const kakaoRedirectUri = "http://localhost:8080/oauth2/authorization/kakao"
 
 
 const loginWithKakao = () => {
