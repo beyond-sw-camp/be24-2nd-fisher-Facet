@@ -1,23 +1,22 @@
 <script setup>
-import { RouterLink, useRoute, useRouter } from 'vue-router'//useRouter추가
-import { computed,ref,onMounted } from 'vue'//ref, onmounted 추가 
+import { RouterLink, useRoute, useRouter } from 'vue-router' //useRouter추가
+import { computed, ref, onMounted } from 'vue' //ref, onmounted 추가
 import useAuthStore from '@/stores/useAuthStore'
 
-const router = useRouter()//추가
-const inputQuery = ref('')//추가
+const router = useRouter() //추가
+const inputQuery = ref('') //추가
 const route = useRoute()
-const isAuction = computed(() => route.path.includes('auction'))
 const isFunding = computed(() => route.path.includes('funding'))
 const authStore = useAuthStore()
 
-const onSearchClick = () => { //상수 추가
+const onSearchClick = () => {
+  //상수 추가
   //검색어가 공백이면 이동 안한다고오오오
-  if(!inputQuery.value.trim()) 
-  return
+  if (!inputQuery.value.trim()) return
 
   router.push({
     name: 'auction_list',
-    query: {q: inputQuery.value }
+    query: { q: inputQuery.value },
   })
 }
 
@@ -27,6 +26,7 @@ onMounted(() => {
 </script>
 
 <template class="overflow-x-hidden">
+  <!-- 로그인 했을 때 헤더 -->
   <div v-if="authStore.isLogin">
     <div class="border-b border-gray-100 bg-white/95 backdrop-blur-sm sticky top-0 z-50">
       <div class="max-w-[1440px] mx-auto px-4 md:px-10 h-20 flex justify-between items-center">
@@ -43,10 +43,10 @@ onMounted(() => {
             <RouterLink
               :to="{ name: 'Main_root' }"
               :class="
-                isAuction
-                  ? 'text-black border-b-2 border-black' // 선택되었을 때 클래스
-                  : 'hover:text-black transition-colors' // 선택되지 않았을 때 클래스
-              " 
+                isFunding
+                  ? 'hover:text-black transition-colors' // 선택되었을 때 클래스
+                  : 'text-black border-b-2 border-black' // 선택되지 않았을 때 클래스
+              "
               class="py-1"
               >경매</RouterLink
             >
@@ -64,18 +64,23 @@ onMounted(() => {
         </div>
 
         <div class="flex-1 max-w-md mx-8 hidden md:block">
-          <div class="relative w-full flex items-center">
-            <button @click="onSearchClick"
-            type="button"
-            aria-label="검색 실행"
-            class="absolute left-4 text-gray-400 text-xs">🔍</button>
+          <div class="flex items-center gap-2">
             <input
               v-model="inputQuery"
               @keyup.enter="onSearchClick"
               type="text"
               placeholder="어떤 보석을 찾으시나요?"
-              class="w-full bg-gray-50 border border-gray-100 rounded-full py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-[#A39382] transition-all placeholder:text-gray-300"
+              class="flex-1 h-[44px] bg-gray-50 border border-gray-100 rounded-full px-6 text-sm focus:outline-none focus:border-[#A39382] transition-all placeholder:text-gray-300"
             />
+
+            <button
+              @click="onSearchClick"
+              type="button"
+              aria-label="검색 실행"
+              class="w-[44px] h-[44px] flex items-center justify-center bg-white border border-gray-100 text-[#A39382] rounded-full transition-all duration-300 active:scale-95 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)] hover:border-[#A39382]"
+            >
+              <i class="fa-solid fa-magnifying-glass text-[14px]"></i>
+            </button>
           </div>
         </div>
 
@@ -93,6 +98,7 @@ onMounted(() => {
       </div>
     </div>
   </div>
+  <!-- 로그인 안 했을 때 헤더 -->
   <div v-else>
     <header class="border-b border-gray-100 bg-white/95 backdrop-blur-sm sticky top-0 z-50">
       <div class="max-w-[1440px] mx-auto px-4 md:px-10 h-20 flex justify-between items-center">
@@ -109,9 +115,9 @@ onMounted(() => {
             <RouterLink
               :to="{ name: 'Main_auction' }"
               :class="[
-                isAuction
-                  ? 'text-black border-b-2 border-black' // 선택되었을 때 클래스
-                  : 'hover:text-black transition-colors', // 선택되지 않았을 때 클래스
+                isFunding
+                  ? 'hover:text-black transition-colors' // 선택되었을 때 클래스
+                  : 'text-black border-b-2 border-black', // 선택되지 않았을 때 클래스
               ]"
               class="py-1"
               >경매</RouterLink
@@ -130,19 +136,23 @@ onMounted(() => {
         </div>
 
         <div class="flex-1 max-w-md mx-8 hidden md:block">
-          <div class="relative flex items-center">
-            <button 
-            @click="onSearchClick"
-            type="button"
-            aria-label="검색 실행"
-            class="absolute left-4 text-gray-400 text-xs">🔍</button>
+          <div class="flex items-center gap-2">
             <input
               v-model="inputQuery"
               @keyup.enter="onSearchClick"
               type="text"
               placeholder="어떤 보석을 찾으시나요?"
-              class="w-full bg-gray-50 border border-gray-100 rounded-full py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-[#A39382] transition-all placeholder:text-gray-300"
+              class="flex-1 h-[44px] bg-gray-50 border border-gray-100 rounded-full px-6 text-sm focus:outline-none focus:border-[#A39382] transition-all placeholder:text-gray-300"
             />
+
+            <button
+              @click="onSearchClick"
+              type="button"
+              aria-label="검색 실행"
+              class="w-[44px] h-[44px] flex items-center justify-center bg-white border border-gray-100 text-[#A39382] rounded-full transition-all duration-300 active:scale-95 shadow-[0_2px_8px_-2px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_12px_-2px_rgba(0,0,0,0.1)] hover:border-[#A39382]"
+            >
+              <i class="fa-solid fa-magnifying-glass text-[14px]"></i>
+            </button>
           </div>
         </div>
 

@@ -75,6 +75,15 @@ const router = createRouter({
           },
           component: () => import('../views/auction/Auction_end.vue'),
         },
+        {
+          name: 'auction_success',
+          path: 'auction/auction_success',
+          meta: {
+            title: '경매 종료',
+            requiresAuth: false,
+          },
+          component: () => import('../views/auction/Auction_success.vue'),
+        },
 
         {
           name: 'main_funding',
