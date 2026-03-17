@@ -153,7 +153,7 @@ watch(
           <div class="space-y-6">
             <div class="bg-gray-50 rounded-sm overflow-hidden border border-gray-100 group">
               <img
-                :src="auctionDetail.img"
+                :src="auctionDetail.image"
                 alt="Main Product"
                 class="w-full aspect-[4/4.5] object-cover group-hover:scale-[1.02] transition duration-700"
               />
@@ -355,7 +355,7 @@ watch(
               🔒 <span class="font-semibold">경매 종료</span> · 입찰이 마감된 상품입니다
             </p>
           </div>
-          <div class="text-sm font-medium accent-text">Final Price ₩ 4,250,000</div>
+          <div class="text-sm font-medium accent-text">Final Price ₩ {{ auctionDetail.currentPrice.toLocaleString() }}</div>
         </div>
       </div>
       <main class="max-w-7xl mx-auto py-16 px-6 lg:px-10 pb-40">
@@ -368,8 +368,8 @@ watch(
           <div class="space-y-6">
             <div class="relative bg-gray-50 border border-gray-100 overflow-hidden">
               <img
-                src="https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=1200&q=80"
-                class="w-full object-cover grayscale"
+                :src="auctionDetail.image"
+                class="w-full aspect-[4/4.5] object-cover grayscale"
                 alt="product"
               />
 
@@ -405,11 +405,11 @@ watch(
 
               <div class="flex justify-between items-end">
                 <div>
-                  <p class="text-3xl font-bold accent-text pb-1">₩ 4,250,000</p>
+                  <p class="text-3xl font-bold accent-text pb-1">₩ {{ auctionDetail.currentPrice.toLocaleString() }}</p>
                   <p class="text-sm text-gray-500 mt-1">최종 낙찰가</p>
                 </div>
                 <div class="text-right text-sm text-gray-600">
-                  <p class="pb-1">총 입찰수 {{ auctionDetail.bidCount }}회</p>
+                  <p class="pb-1">총 입찰수 {{ auctionDetail.bidCount.toLocaleString() }}회</p>
                   <p>종료일 {{ auctionDetail.endAt }}</p>
                 </div>
               </div>
