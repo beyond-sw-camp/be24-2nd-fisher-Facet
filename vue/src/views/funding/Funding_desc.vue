@@ -5,7 +5,8 @@ import api from '@/api/funding'
 import { useRewardStore } from '@/stores/rewardStore';
 const rewardStore = useRewardStore();
 
-const fundingDesc = ref()   // 해당 상품 리스트 
+// 해당 상품 리스트 
+const fundingDesc = ref({})   
 const fundingDetail = ref() // 추천 상품 리스트
 const route = useRoute()
 const Quantity = ref(1)
@@ -21,8 +22,8 @@ const getDesc = async () => {
   const idx = route.params.idx
   const res = await api.FundingDesc(idx)
   // console.log(res.result)
-  fundingDesc.value = res.result
-
+  fundingDesc.value = await res.result
+  console.log("fundingDesc", fundingDesc.value)
   mainImage.value = res.result.img
 
   // 데이터 불러온 후 바로 카운트다운 시작
@@ -147,7 +148,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <main v-if="fundingDesc" class="max-w-[1440px] mx-auto px-4 md:px-10 py-8">
+  <main v-if="fundingDetail && fundingDesc " class="max-w-[1440px] mx-auto px-4 md:px-10 py-8">
     <!-- Breadcrumb -->
     <nav class="text-[10px] text-gray-400 mb-6 uppercase tracking-[0.2em]">
       Home / Funding / Handmade /
@@ -198,7 +199,7 @@ onUnmounted(() => {
               @click="changeMainImage(fundingDesc.img)">
               <img :src="fundingDesc.img" class="w-full h-full object-cover" alt="Thumb 1" />
             </button>
-            <div v-for="img in fundingDesc.fundingImgList">
+            <div v-for="img in fundingDesc.fundImgList">
               <button
                 class="thumb shrink-0 border border-[#A39382] rounded-md overflow-hidden w-24 aspect-square bg-white"
                 @click="changeMainImage(img.imgDetail)" :data-src="img.imgDetail">
@@ -223,19 +224,19 @@ onUnmounted(() => {
             <div class="p-6 border border-gray-100 rounded-md bg-white">
               <p class="text-[10px] text-gray-400 uppercase tracking-[0.2em] mb-2">Key Point</p>
               <p class="text-sm text-gray-700 leading-relaxed font-light">
-                {{ fundingDesc.fundingStory.keyPoint }}
+                {{ fundingDesc.fundStory.keyPoint }}
               </p>
             </div>
             <div class="p-6 border border-gray-100 rounded-md bg-white">
               <p class="text-[10px] text-gray-400 uppercase tracking-[0.2em] mb-2">Material</p>
               <p class="text-sm text-gray-700 leading-relaxed font-light">
-                {{ fundingDesc.fundingStory.material }}
+                {{ fundingDesc.fundStory.material }}
               </p>
             </div>
             <div class="p-6 border border-gray-100 rounded-md bg-white">
               <p class="text-[10px] text-gray-400 uppercase tracking-[0.2em] mb-2">Handmade</p>
               <p class="text-sm text-gray-700 leading-relaxed font-light">
-                {{ fundingDesc.fundingStory.handMade }}
+                {{ fundingDesc.fundStory.handMade }}
               </p>
             </div>
           </section>
@@ -247,7 +248,7 @@ onUnmounted(() => {
               Project Story
             </h2>
             <p class="text-sm text-gray-600 leading-relaxed font-light">
-              {{ fundingDesc.fundingStory.projectStory }}
+              {{ fundingDesc.fundStory.projectStory }}
             </p>
           </section>
 
@@ -284,15 +285,15 @@ onUnmounted(() => {
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div class="p-5 bg-gray-50 rounded-md border border-gray-100">
                 <p class="text-[10px] text-gray-400 uppercase tracking-[0.2em] mb-2">Experience</p>
-                <p class="text-sm text-gray-700 font-light">{{ fundingDesc.fundingMaker.experience }}</p>
+                <p class="text-sm text-gray-700 font-light">{{ fundingDesc.fundMaker.experience }}</p>
               </div>
               <div class="p-5 bg-gray-50 rounded-md border border-gray-100">
                 <p class="text-[10px] text-gray-400 uppercase tracking-[0.2em] mb-2">Style</p>
-                <p class="text-sm text-gray-700 font-light">{{ fundingDesc.fundingMaker.style }}</p>
+                <p class="text-sm text-gray-700 font-light">{{ fundingDesc.fundMaker.style }}</p>
               </div>
               <div class="p-5 bg-gray-50 rounded-md border border-gray-100">
                 <p class="text-[10px] text-gray-400 uppercase tracking-[0.2em] mb-2">Promise</p>
-                <p class="text-sm text-gray-700 font-light">{{ fundingDesc.fundingMaker.promise }}</p>
+                <p class="text-sm text-gray-700 font-light">{{ fundingDesc.fundMaker.promise }}</p>
               </div>
             </div>
 
@@ -313,7 +314,7 @@ onUnmounted(() => {
             </h2>
 
             <div class="space-y-8">
-              <div v-for="(Process, index) in fundingDesc.fundingProcessList" :key="Process.idx"
+              <div v-for="(Process, index) in fundingDesc.fundProcessList" :key="Process.idx"
                 class="flex items-start space-x-4 mb-8">
 
                 <div
@@ -435,9 +436,9 @@ onUnmounted(() => {
                 <div class="flex-1 pr-2">
                   <p class="text-[12px] font-medium text-gray-800 line-clamp-1">{{ reward.title }}</p>
                   <p class="text-[11px] text-gray-500">수량: {{ reward.count }} / ₩{{ (reward.price *
-                    reward.count).toLocaleString() }}</p>
+                    reward?.count).toLocaleString() }}</p>
                 </div>
-                <button @click="removeReward(reward.uniqueId)"
+                <button @click="removeReward(reward?.uniqueId)"
                   class="text-gray-300 hover:text-red-400 transition-colors text-lg px-2">✕</button>
               </div>
             </div>

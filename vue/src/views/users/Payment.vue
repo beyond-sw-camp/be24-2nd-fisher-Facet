@@ -1,7 +1,8 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed } from 'vue';
 import { useRewardStore } from '@/stores/rewardStore'; // 1. 스토어 불러오기
 import { useRouter } from 'vue-router'
+import api from '@/api/user/index';
 
 // 2. 스토어 인스턴스 생성
 const rewardStore = useRewardStore();
@@ -10,6 +11,7 @@ const router = useRouter()
 // 3. 선택된 리워드 데이터 가져오기 (반응형 유지를 위해 computed 권장)
 const selectedRewards = computed(() => rewardStore.selectedRewards);
 const finalPrice = computed(() => rewardStore.totalPrice);
+const fundIdxList = selectedRewards.value.map(item => item.idx);
 
 console.log("selectedReward", selectedRewards.value)
 
@@ -51,6 +53,7 @@ const setShippingMode = (mode) => (shippingMode.value = mode);
 const setPaymentType = (type) => (paymentType.value = type);
 const setPaymentMethod = (method) => (paymentMethod.value = method);
 
+
 // 후원금 유효성 검사 로직
 const validateSupportAmount = () => {
     const amount = extraSupport.value;
@@ -66,7 +69,7 @@ const validateSupportAmount = () => {
 };
 
 // 결제 금액 버튼 생성
-const handlePayment = () => {
+const handlePayment = async () => {
     if (supportError.value) {
         alert('후원금액을 다시 확인해주세요.');
         return;
@@ -77,13 +80,24 @@ const handlePayment = () => {
     }
     alert(`${totalAmount.value.toLocaleString()}원 결제가 예약되었습니다!`);
 
+    await fundOrders()
     clearData()
 };
+
+const fundOrders = async () => {
+    const currentIdxList = selectedRewards.value.map(item => item.idx);
+
+    const orderDto = {
+        paymentPrice: totalAmount.value,
+        fundIdxList: currentIdxList 
+    };
+    const res = await api.fundOrders(orderDto)
+    // console.log("res.result", res.result)
+}
 
 const clearData = () => {
     rewardStore.clearRewards()
 }
-
 
 </script>
 
@@ -100,8 +114,9 @@ const clearData = () => {
                     <span class="icon">💡</span>
                     <div class="text">
                         <strong>펀딩 결제 안내</strong>
-                        <p>본 프로젝트는 안심 결제 시스템을 적용하여, 참여 즉시 결제가 진행됩니다. 
-                            <br/>목표 금액 미달 시 시스템을 통해 수수료를 포함한 결제 금액 전액이 자동 환불됨을 보장합니다.</p>
+                        <p>본 프로젝트는 안심 결제 시스템을 적용하여, 참여 즉시 결제가 진행됩니다.
+                            <br />목표 금액 미달 시 시스템을 통해 수수료를 포함한 결제 금액 전액이 자동 환불됨을 보장합니다.
+                        </p>
                     </div>
                 </div>
 
