@@ -32,10 +32,6 @@ const kakaoCallBack = async () =>{
   return res
 }
 
- const fundOrders = async(orderDto)=>{
-  const res = await api.post("/fundOrders/create",orderDto)
-  // console.log("res.data", res.data)
-  return res.data;
- }
 
-export default { login, signup , reg, list,kakaoCallBack,fundOrders}
+
+export default { login, signup , reg, list,kakaoCallBack}
