@@ -2,8 +2,11 @@ import api from '@/plugins/axiosinterceptor'
 
 const login = async (req) => {
   const res = await api.post('/user/login', req)
-  console.log('index', res)
   return res
+}
+
+const logout = async (req) => {
+  return await api.post('/user/logout', req)
 }
 
 // signup.vue에서 넣어준 매개변수가 들어와서 백엔드로 보내진다.
@@ -32,4 +35,4 @@ const kakaoCallBack = async () =>{
   return res
 }
 
-export default { login, signup , reg, list,kakaoCallBack}
+export default { login, logout, signup, reg, list, kakaoCallBack }
