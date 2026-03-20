@@ -21,6 +21,7 @@ const getImage = async (prodIdx) => {
 }
 
 const bid = async (bidData) => {
+  const token = localStorage.getItem('accessToken')
   const res = await api.post('/auction/bid', bidData)
   return res.data
 }
