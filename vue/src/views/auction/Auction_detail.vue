@@ -86,17 +86,20 @@ const sendBid = async () => {
     bidPrice: Number(inputPrice.value),
   }
   if (currentPrice.value < Number(inputPrice.value)) {
-    currentPrice.value = Number(inputPrice.value)
-    try {
-      const res = await api.bid(bidData)
-
-      if (res.data.success) {
-        // 서버에서 업데이트된 상품의 '현재가'를 받아와서 화면에 반영
-        currentPrice.value = res.data.result.bidPrice
-        alert('입찰 성공! 현재 최고가는 ' + currentPrice.value + '원입니다.')
+    if (inputPrice.value % auctionDetail.value.bidIncrement == 0) {
+      currentPrice.value = Number(inputPrice.value)
+      try {
+        const res = await api.bid(bidData)
+        if (res.success) {
+          // 서버에서 업데이트된 상품의 '현재가'를 받아와서 화면에 반영
+          currentPrice.value = res.result.bidPrice
+          alert('입찰 성공! 현재 최고가는 ' + currentPrice.value.toLocaleString() + '원입니다.')
+        }
+      } catch (err) {
+        console.error(err)
       }
-    } catch (err) {
-      console.error(err)
+    } else {
+      alert('입찰 단위에 맞는 금액을 입력해주세요.')
     }
   } else {
     alert('현재 입찰가보다 높은 금액을 입력하세요.')
