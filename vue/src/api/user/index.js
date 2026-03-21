@@ -6,6 +6,10 @@ const login = async (req) => {
   return res
 }
 
+const logout = async (req) => {
+  return await api.post('/user/logout', req)
+}
+
 // signup.vue에서 넣어준 매개변수가 들어와서 백엔드로 보내진다.
 const signup = async (req) => {
   const res = await api.post('/user/signup', req)
@@ -32,6 +36,5 @@ const kakaoCallBack = async () =>{
   return res
 }
 
+export default { login, logout, signup, reg, list, kakaoCallBack }
 
-
-export default { login, signup , reg, list,kakaoCallBack}

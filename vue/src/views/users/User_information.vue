@@ -1,7 +1,8 @@
 <script setup>
-  import { onMounted, ref } from 'vue'
-import useAuthStore from '@/stores/useAuthStore'
+import { onMounted, ref } from 'vue'
+import { useAuthStore } from '@/stores/useAuthStore'
 import { useRouter } from 'vue-router'
+import api from '@/api/user/index.js'
 
 const authStore = useAuthStore()
 const userInfo = ref('')
@@ -21,9 +22,19 @@ onMounted(() => {
   }
 })
 
-const logout = () => {
-  authStore.logout()
-  router.push('/')
+const logout = async () => {
+  try {
+    // 쿠키 삭제를 위한 백엔드 통신
+    const res = await api.logout()
+    if (res.status == 200) {
+      authStore.logout(JSON.stringify(res.data))
+      router.push('/')
+    } else {
+      alert('다시 시도해주세요.')
+    }
+  } catch (error) {
+    alert('다시 시도해주세요.')
+  }
 }
 </script>
 
