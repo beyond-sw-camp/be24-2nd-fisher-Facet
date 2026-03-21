@@ -36,8 +36,8 @@ const paymentMethod = ref('card');
 const isPaymentProcessing = ref(false) // 결제가 진행 중인지 확인 (중복 클릭 방지)
 
 const paymentStatus = ref({    // 결제 성공/실패 상태와 메시지를 저장
-  status: "",
-  message: ""
+    status: "",
+    message: ""
 });
 
 // 사용자 정보
@@ -94,67 +94,70 @@ const handlePayment = async () => {
 
 // 포트원 
 const onPayment = async () => {
-  if (selectedRewards.length === 0) return // 선택한 상품이 없으면 중단
-  if (isPaymentProcessing.value) return // 이미 결제 중이면 중단
+    if (selectedRewards.length === 0) return // 선택한 상품이 없으면 중단
+    if (isPaymentProcessing.value) return // 이미 결제 중이면 중단
 
-  isPaymentProcessing.value = true // 결제 프로세스 시작 알림
-  paymentStatus.value = {status: "", message: ""}
+    isPaymentProcessing.value = true // 결제 프로세스 시작 알림
+    paymentStatus.value = { status: "", message: "" }
 
-  let ordersIdx = null // 서버에서 생성된 주문 번호를 담을 변수
+    let ordersIdx = null // 서버에서 생성된 주문 번호를 담을 변수
 
-  // 주문 이름 만들기 (ex: "반지 외 2건")
-  const firstItem = selectedRewards.value[0]
-  const fundIdxList = selectedRewards.value.map(item => item.idx); // [4, 5] 처럼 idx만 추출
-  const orderName = selectedRewards.value.length === 1
-      ? firstItem.title
-      : `${firstItem.title} 외 ${selectedRewards.value.length - 1}건`
+    // 주문 이름 만들기 (ex: "반지 외 2건")
+    const firstItem = selectedRewards.value[0]
+    const orderName = selectedRewards.value.length === 1
+        ? firstItem.title
+        : `${firstItem.title} 외 ${selectedRewards.value.length - 1}건`
 
+    const ordersItemsList = selectedRewards.value.map(item => ({
+        productIdx: item.idx,
+        quantity: item.quantity
+    }))
 
-   const orderDto = ({
-        paymentPrice: totalAmount.value,
-        fundIdxList: fundIdxList 
-});
+    const orderDto = ({
+        price: totalAmount.value,
+        ordersItems: ordersItemsList
+    });
 
-  // 1단계: 우리 서버(Spring)에 "이 상품들 주문할 거야"라고 미리 알리고 주문 DB를 만듭니다.
-  const createResponse = await api.fundOrders(orderDto)
+    // 1단계: 우리 서버(Spring)에 "이 상품들 주문할 거야"라고 미리 알리고 주문 DB를 만듭니다.
+    const createResponse = await api.fundOrders(orderDto)
+    console.log(createResponse.idx)
+    // 서버가 생성해준 주문 PK(ordersIdx)를 받아옵니다.
+    ordersIdx = createResponse.idx
 
-  // 서버가 생성해준 주문 PK(ordersIdx)를 받아옵니다.
-  ordersIdx = createResponse.result.ordersIdx
-
-  // 현재 시간을 가져와서 특수문자(-, :, .)를 다 제거하는 방식
+    // 현재 시간을 가져와서 특수문자(-, :, .)를 다 제거하는 방식
     const timestamp = new Date().toISOString().replace(/[-:T.Z]/g, "").slice(0, 14);
     const shortUuid = crypto.randomUUID().split('-')[0];
 
-  // 2단계: 실제 포트원 결제창을 띄웁니다.
-  const payment = await PortOne.requestPayment({
-    storeId: "store-c4620c46-17fa-4ebc-ac59-8d04c156cbf4",   // 내 상점 식별자
-    channelKey: "channel-key-dafcb684-1f58-465d-9fad-97b92723116d", // 결제 채널(카카오페이 등) 키
-    paymentId: `facet_${timestamp}_${shortUuid}`, // 이번 결제의 고유 번호, 결과: facet_20260319004654_a1b2c3d4
-    orderName: orderName,      // 결제창에 뜰 이름
-    totalAmount: totalAmount.value, // 결제할 금액
-    currency: 'KRW',           // 통화 (원화)
-    payMethod: "CARD",         // 결제 수단 (카드)
-    customData: {ordersIdx, fundIdxList} // 나중에 확인용으로 담아두는 추가 데이터
-  }).then((res) => {
-    return res; // 결제 시도 후 결과 반환
-  }).catch((error) => {
-    // 결제창 자체가 안 뜨거나 에러 났을 때 처리
-    paymentStatus.value = {status: "FAILED", message: '결제 시도가 실패하였습니다.'}
-  });
+    // 2단계: 실제 포트원 결제창을 띄웁니다.
+    const payment = await PortOne.requestPayment({
+        storeId: "store-c4620c46-17fa-4ebc-ac59-8d04c156cbf4",   // 내 상점 식별자
+        channelKey: "channel-key-dafcb684-1f58-465d-9fad-97b92723116d", // 결제 채널(카카오페이 등) 키
+        paymentId: `facet_${timestamp}_${shortUuid}`, // 이번 결제의 고유 번호, 결과: facet_20260319004654_a1b2c3d4
+        orderName: orderName,      // 결제창에 뜰 이름
+        totalAmount: totalAmount.value, // 결제할 금액
+        currency: 'KRW',           // 통화 (원화)
+        payMethod: "CARD",         // 결제 수단 (카드)
+        customData: { ordersIdx, ordersItemsList } // 나중에 확인용으로 담아두는 추가 데이터
+    }).then((res) => {
+        return res; // 결제 시도 후 결과 반환
+    }).catch((error) => {
+        // 결제창 자체가 안 뜨거나 에러 났을 때 처리
+        paymentStatus.value = { status: "FAILED", message: '결제 시도가 실패하였습니다.' }
+    });
 
-  // 3단계: 결제 검증 (서버에 "실제로 돈이 들어왔는지 확인해줘"라고 요청)
-  // 결제가 끝나면 포트원에서 준 paymentId를 우리 서버로 보내서 2차 확인을 합니다.
-  const paymentId = ({
-    paymentId: payment.paymentId
-  })
+    // 3단계: 결제 검증 (서버에 "실제로 돈이 들어왔는지 확인해줘"라고 요청)
+    // 결제가 끝나면 포트원에서 준 paymentId를 우리 서버로 보내서 2차 확인을 합니다.
+    const paymentId = ({
+        paymentId: payment.paymentId
+    })
 
-  const verifyResponse = await api.verifyOrders(paymentId)
-  // console.log(verifyResponse.code)
+    const verifyResponse = await api.verifyOrders(paymentId)
+    // console.log(verifyResponse.code)
 
-  if(verifyResponse.code == 2000){
-     router.push({ name: 'shipping' })
-     clearData()
-  }
+    if (verifyResponse.code == 2000) {
+        router.push({ name: 'shipping' })
+        clearData()
+    }
 }
 
 // 피니아 데이터 삭제 
@@ -192,8 +195,8 @@ const clearData = () => {
                                 <p class="desc">{{ reward.contents }} </p>
                                 <div class="price-qty">
                                     <span class="price">
-                                        {{ Number(reward.price * reward.count).toLocaleString() }}원</span>
-                                    <span class="qty">수량 {{ reward.count }}개</span>
+                                        {{ Number(reward.price * reward.quantity).toLocaleString() }}원</span>
+                                    <span class="qty">수량 {{ reward.quantity }}개</span>
                                 </div>
                             </div>
                         </div>
