@@ -47,13 +47,13 @@ const getDetail = async () => {
 const currentTab = ref('Detail')
 // 경매 시작 전 프리뷰용 감시
 watch(
-  () => auctionDetail.value?.startAt,
-  (newVal) => {
-    if (newVal) {
-      showPreview(newVal)
-    }
-  },
-  { immediate: true },
+    () => auctionDetail.value?.startAt,
+    (newVal) => {
+      if (newVal) {
+        showPreview(newVal)
+      }
+    },
+    { immediate: true },
 )
 
 // 프리뷰 띄우기 로직
@@ -73,14 +73,14 @@ const showPreview = (targetDateStr) => {
 
 // 경매 시작 후 카운트 다운용 감시
 watch(
-  () => auctionDetail.value?.endAt,
-  (newVal) => {
-    if (newVal) {
-      // 데이터가 들어왔을 때만 카운트다운 시작!
-      startCountdown(newVal)
-    }
-  },
-  { immediate: true },
+    () => auctionDetail.value?.startAt,
+    (newVal) => {
+      if (newVal) {
+        // 데이터가 들어왔을 때만 카운트다운 시작!
+        startCountdown(newVal)
+      }
+    },
+    { immediate: true },
 )
 
 // 카운트다운 로직
@@ -101,14 +101,14 @@ const startCountdown = (targetDateStr) => {
     // 시간 단위 계산기
     const d = Math.floor(diff / (1000 * 60 * 60 * 24)) // 일
     const h = Math.floor((diff / (1000 * 60 * 60)) % 24)
-      .toString()
-      .padStart(2, '0') // 시
+        .toString()
+        .padStart(2, '0') // 시
     const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
-      .toString()
-      .padStart(2, '0') // 분
+        .toString()
+        .padStart(2, '0') // 분
     const s = Math.floor((diff % (1000 * 60)) / 1000)
-      .toString()
-      .padStart(2, '0') // 초
+        .toString()
+        .padStart(2, '0') // 초
 
     if (d > 0) {
       countdown.value = `${d}일 ${h}:${m}:${s}`
@@ -185,7 +185,7 @@ const sendBid = async () => {
         <div class="max-w-7xl mx-auto px-6 py-3 text-center">
           <p class="text-sm font-light tracking-widest">
             COMING SOON · 본 상품은 <span class="font-bold">{{ auctionDetail.startAt }}</span
-            >에 경매가 시작됩니다.
+          >에 경매가 시작됩니다.
           </p>
         </div>
       </div>
@@ -208,7 +208,7 @@ const sendBid = async () => {
 
           <div class="flex flex-col justify-center">
             <span
-              class="inline-block w-fit px-3 py-1 bg-gray-100 text-gray-500 text-[10px] font-bold rounded-full mb-4 tracking-widest uppercase"
+                class="inline-block w-fit px-3 py-1 bg-gray-100 text-gray-500 text-[10px] font-bold rounded-full mb-4 tracking-widest uppercase"
             >
               Preview Only
             </span>
@@ -228,20 +228,20 @@ const sendBid = async () => {
                 <div class="flex justify-between text-sm">
                   <span class="text-gray-400 font-light">경매 시작가</span>
                   <span class="text-gray-800 font-medium"
-                    >₩ {{ Number(startPrice).toLocaleString() }}</span
+                  >₩ {{ Number(startPrice).toLocaleString() }}</span
                   >
                 </div>
                 <div class="flex justify-between text-sm border-t border-gray-50 pt-4">
                   <span class="text-gray-400 font-light">입찰 단위</span>
                   <span class="text-gray-800 font-medium"
-                    >₩ {{ Number(auctionDetail.bidIncrement).toLocaleString() }}</span
+                  >₩ {{ Number(auctionDetail.bidIncrement).toLocaleString() }}</span
                   >
                 </div>
               </div>
 
               <button
-                disabled
-                class="w-full py-4 border border-gray-200 text-gray-300 font-bold text-xs tracking-[0.3em] uppercase cursor-not-allowed"
+                  disabled
+                  class="w-full py-4 border border-gray-200 text-gray-300 font-bold text-xs tracking-[0.3em] uppercase cursor-not-allowed"
               >
                 Wait for Launch
               </button>

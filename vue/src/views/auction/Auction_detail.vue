@@ -12,6 +12,7 @@ const startPrice = ref()
 const inputPrice = ref('')
 const currentPrice = ref()
 const bidCount = ref()
+const userId = ref()
 let countdown = ref('')
 let isBefore = ref(false)
 let isDone = ref(false)
@@ -26,6 +27,10 @@ import { Client } from '@stomp/stompjs'
 onMounted(() => {
   // 시작하자마자 로그인 여부 확인
   const isLogged = authStore.isLogin || localStorage.getItem('USERINFO')
+  // 1. localStorage에서 가져온 문자열을 객체로 변환하여 ref에 할당
+  const userInfo = ref(JSON.parse(localStorage.getItem('USERINFO')))
+  userId.value = userInfo.value.idx
+  console.log(userId.value)
 
   if (!authStore.isLogin && !localStorage.getItem('USERINFO')) {
     alert('로그인이 필요한 페이지입니다.')
@@ -62,13 +67,13 @@ const getDetail = async () => {
 }
 // 경매 시작 전 프리뷰용 감시
 watch(
-  () => auctionDetail.value?.startAt,
-  (newVal) => {
-    if (newVal) {
-      showPreview(newVal)
-    }
-  },
-  { immediate: true },
+    () => auctionDetail.value?.startAt,
+    (newVal) => {
+      if (newVal) {
+        showPreview(newVal)
+      }
+    },
+    { immediate: true },
 )
 
 // 프리뷰 띄우기 로직
@@ -88,14 +93,14 @@ const showPreview = (targetDateStr) => {
 
 // 경매 시작 후 카운트 다운용 감시
 watch(
-  () => auctionDetail.value?.endAt,
-  (newVal) => {
-    if (newVal) {
-      // 데이터가 들어왔을 때만 카운트다운 시작!
-      startCountdown(newVal)
-    }
-  },
-  { immediate: true },
+    () => auctionDetail.value?.endAt,
+    (newVal) => {
+      if (newVal) {
+        // 데이터가 들어왔을 때만 카운트다운 시작!
+        startCountdown(newVal)
+      }
+    },
+    { immediate: true },
 )
 
 // 카운트다운 로직
@@ -116,14 +121,14 @@ const startCountdown = (targetDateStr) => {
     // 시간 단위 계산기
     const d = Math.floor(diff / (1000 * 60 * 60 * 24)) // 일
     const h = Math.floor((diff / (1000 * 60 * 60)) % 24)
-      .toString()
-      .padStart(2, '0') // 시
+        .toString()
+        .padStart(2, '0') // 시
     const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
-      .toString()
-      .padStart(2, '0') // 분
+        .toString()
+        .padStart(2, '0') // 분
     const s = Math.floor((diff % (1000 * 60)) / 1000)
-      .toString()
-      .padStart(2, '0') // 초
+        .toString()
+        .padStart(2, '0') // 초
 
     if (d > 0) {
       countdown.value = `${d}일 ${h}:${m}:${s}`
@@ -152,7 +157,7 @@ const sendBid = async () => {
           const bidUpdateMessage = {
             auctionId: auctionId.value,
             newPrice: currentPrice.value,
-            bidCount: bidCount.value
+            bidCount: bidCount.value,
           }
           socket.value.publish({
             destination: '/ws/bid/' + auctionId.value, // Config의 applicationDestinationPrefixes + @MessageMapping
@@ -174,7 +179,7 @@ const sendBid = async () => {
 // 웹소켓
 const connectWebSocket = () => {
   const ws = new Client({
-    brokerURL: 'ws://localhost:5173/ws',
+    brokerURL: 'wss://www.facet7.kro.kr/api/ws',
   })
   socket.value = ws
 
@@ -200,7 +205,7 @@ const connectWebSocket = () => {
         <div class="max-w-7xl mx-auto px-6 py-3 text-center">
           <p class="text-sm font-light tracking-widest">
             COMING SOON · 본 상품은 <span class="font-bold">{{ auctionDetail.startAt }}</span
-            >에 경매가 시작됩니다.
+          >에 경매가 시작됩니다.
           </p>
         </div>
       </div>
@@ -223,7 +228,7 @@ const connectWebSocket = () => {
 
           <div class="flex flex-col justify-center">
             <span
-              class="inline-block w-fit px-3 py-1 bg-gray-100 text-gray-500 text-[10px] font-bold rounded-full mb-4 tracking-widest uppercase"
+                class="inline-block w-fit px-3 py-1 bg-gray-100 text-gray-500 text-[10px] font-bold rounded-full mb-4 tracking-widest uppercase"
             >
               Preview Only
             </span>
@@ -243,20 +248,20 @@ const connectWebSocket = () => {
                 <div class="flex justify-between text-sm">
                   <span class="text-gray-400 font-light">경매 시작가</span>
                   <span class="text-gray-800 font-medium"
-                    >₩ {{ Number(startPrice).toLocaleString() }}</span
+                  >₩ {{ Number(startPrice).toLocaleString() }}</span
                   >
                 </div>
                 <div class="flex justify-between text-sm border-t border-gray-50 pt-4">
                   <span class="text-gray-400 font-light">입찰 단위</span>
                   <span class="text-gray-800 font-medium"
-                    >₩ {{ Number(auctionDetail.bidIncrement).toLocaleString() }}</span
+                  >₩ {{ Number(auctionDetail.bidIncrement).toLocaleString() }}</span
                   >
                 </div>
               </div>
 
               <button
-                disabled
-                class="w-full py-4 border border-gray-200 text-gray-300 font-bold text-xs tracking-[0.3em] uppercase cursor-not-allowed"
+                  disabled
+                  class="w-full py-4 border border-gray-200 text-gray-300 font-bold text-xs tracking-[0.3em] uppercase cursor-not-allowed"
               >
                 Wait for Launch
               </button>
@@ -278,20 +283,20 @@ const connectWebSocket = () => {
             <div class="space-y-6">
               <div class="bg-gray-50 rounded-sm overflow-hidden border border-gray-100 group">
                 <img
-                  :src="auctionDetail.image"
-                  alt="Main Product"
-                  class="w-full aspect-[4/4.5] object-cover group-hover:scale-[1.02] transition duration-700"
+                    :src="auctionDetail.image"
+                    alt="Main Product"
+                    class="w-full aspect-[4/4.5] object-cover group-hover:scale-[1.02] transition duration-700"
                 />
               </div>
               <div class="grid grid-cols-4 gap-4">
                 <div
-                  class="border border-accent p-1 bg-white"
-                  v-for="item in auctionDetail.img_detail"
+                    class="border border-accent p-1 bg-white"
+                    v-for="item in auctionDetail.img_detail"
                 >
                   <RouterLink to="/auction/Main_auction">
                     <img
-                      :src="item"
-                      class="w-full aspect-square grayscale object-cover hover:grayscale-0 transition cursor-pointer"
+                        :src="item"
+                        class="w-full aspect-square grayscale object-cover hover:grayscale-0 transition cursor-pointer"
                     />
                   </RouterLink>
                 </div>
@@ -301,8 +306,8 @@ const connectWebSocket = () => {
             <div class="flex flex-col">
               <div class="mb-4">
                 <span
-                  class="inline-block px-3 py-1 bg-[#F5F2F0] accent-text text-[10px] font-bold rounded-full mb-3 tracking-widest uppercase"
-                  >Live Auction</span
+                    class="inline-block px-3 py-1 bg-[#F5F2F0] accent-text text-[10px] font-bold rounded-full mb-3 tracking-widest uppercase"
+                >Live Auction</span
                 >
                 <h1 class="text-4xl font-light tracking-tight mb-3 text-gray-900">
                   {{ auctionDetail.name }}
@@ -316,7 +321,7 @@ const connectWebSocket = () => {
                 <div class="flex justify-between items-end border-b border-gray-50 pb-6">
                   <div>
                     <p
-                      class="text-gray-400 text-[10px] uppercase tracking-[0.2em] mb-2 font-medium"
+                        class="text-gray-400 text-[10px] uppercase tracking-[0.2em] mb-2 font-medium"
                     >
                       현재 입찰가
                     </p>
@@ -326,7 +331,7 @@ const connectWebSocket = () => {
                   </div>
                   <div class="text-right">
                     <p
-                      class="text-gray-400 text-[10px] uppercase tracking-[0.2em] mb-2 font-medium"
+                        class="text-gray-400 text-[10px] uppercase tracking-[0.2em] mb-2 font-medium"
                     >
                       남은 시간
                     </p>
@@ -340,7 +345,7 @@ const connectWebSocket = () => {
                   <div class="flex justify-between border-b border-gray-50 pb-2">
                     <span class="text-gray-400 font-light">시작가</span>
                     <span class="text-gray-700 font-medium"
-                      >₩ {{ Number(startPrice).toLocaleString() }}</span
+                    >₩ {{ Number(startPrice).toLocaleString() }}</span
                     >
                   </div>
                   <div class="flex justify-between border-b border-gray-50 pb-2">
@@ -364,19 +369,19 @@ const connectWebSocket = () => {
                 <div class="pt-6">
                   <div class="flex items-center space-x-2 mb-4">
                     <input
-                      v-model="inputPrice"
-                      type="number"
-                      placeholder="입찰 금액을 입력하세요"
-                      :step="auctionDetail.bidIncrement"
-                      id="message"
-                      class="flex-1 bg-white border border-gray-200 px-4 py-3 text-gray-800 focus:outline-none focus:border-[#A39382] transition-all placeholder:text-gray-300"
+                        v-model="inputPrice"
+                        type="number"
+                        placeholder="입찰 금액을 입력하세요"
+                        :step="auctionDetail.bidIncrement"
+                        id="message"
+                        class="flex-1 bg-white border border-gray-200 px-4 py-3 text-gray-800 focus:outline-none focus:border-[#A39382] transition-all placeholder:text-gray-300"
                     />
                     <span class="text-gray-400 text-xs font-bold tracking-widest">KRW</span>
                   </div>
                   <button
-                    @click="sendBid"
-                    class="w-full py-4 bid-button border border-[#A39382]/50 font-bold text-xs tracking-[0.3em] uppercase"
-                    id="sendBid"
+                      @click="sendBid"
+                      class="w-full py-4 bid-button border border-[#A39382]/50 font-bold text-xs tracking-[0.3em] uppercase"
+                      id="sendBid"
                   >
                     Place a Bid
                   </button>
@@ -385,18 +390,18 @@ const connectWebSocket = () => {
 
               <div class="flex border-b border-gray-100 mb-6">
                 <button
-                  v-for="tabBtn in ['Detail', 'History', 'Shipping']"
-                  :key="tabBtn"
-                  @click="currentTab = tabBtn"
-                  class="px-6 py-3 text-[11px] font-bold tab-active uppercase tracking-[0.2em]"
+                    v-for="tabBtn in ['Detail', 'History', 'Shipping']"
+                    :key="tabBtn"
+                    @click="currentTab = tabBtn"
+                    class="px-6 py-3 text-[11px] font-bold tab-active uppercase tracking-[0.2em]"
                 >
                   {{ tabBtn }}
                 </button>
               </div>
 
               <div
-                v-if="currentTab === 'Detail'"
-                class="text-sm text-gray-500 leading-relaxed space-y-3 font-light"
+                  v-if="currentTab === 'Detail'"
+                  class="text-sm text-gray-500 leading-relaxed space-y-3 font-light"
               >
                 <p class="flex items-center">
                   <span class="w-1.5 h-1.5 accent-bg rounded-full mr-3"></span>
@@ -412,8 +417,8 @@ const connectWebSocket = () => {
                 </p>
               </div>
               <div
-                v-if="currentTab === 'History'"
-                class="text-sm text-gray-500 leading-relaxed space-y-3 font-light"
+                  v-if="currentTab === 'History'"
+                  class="text-sm text-gray-500 leading-relaxed space-y-3 font-light"
               >
                 <p class="flex items-center">
                   <span class="w-1.5 h-1.5 accent-bg rounded-full mr-3 mt-1.5 flex-shrink-0"></span>
@@ -421,8 +426,8 @@ const connectWebSocket = () => {
                 </p>
               </div>
               <div
-                v-if="currentTab === 'Shipping'"
-                class="text-sm text-gray-500 leading-relaxed font-light"
+                  v-if="currentTab === 'Shipping'"
+                  class="text-sm text-gray-500 leading-relaxed font-light"
               >
                 <p class="flex items-center">
                   <span class="w-1.5 h-1.5 accent-bg rounded-full mr-3"></span>
@@ -442,7 +447,7 @@ const connectWebSocket = () => {
 
           <section class="mt-32">
             <h2
-              class="text-xl font-light mb-12 tracking-[0.4em] text-center uppercase text-gray-800"
+                class="text-xl font-light mb-12 tracking-[0.4em] text-center uppercase text-gray-800"
             >
               Related Artifacts
             </h2>
@@ -450,21 +455,21 @@ const connectWebSocket = () => {
               <div class="group cursor-pointer" v-for="item in auctionDetail_list.slice(0, 4)">
                 <RouterLink :to="`/auction/auction_desc/${item.idx}`">
                   <div
-                    class="aspect-square bg-gray-50 mb-4 overflow-hidden border border-gray-100 relative"
+                      class="aspect-square bg-gray-50 mb-4 overflow-hidden border border-gray-100 relative"
                   >
                     <img
-                      :src="item.img"
-                      alt="Related"
-                      class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition duration-700"
+                        :src="item.img"
+                        alt="Related"
+                        class="w-full h-full object-cover grayscale group-hover:grayscale-0 group-hover:scale-110 transition duration-700"
                     />
                     <div
-                      class="absolute top-0 right-0 accent-bg px-3 py-1 text-[9px] text-white font-bold tracking-widest uppercase"
+                        class="absolute top-0 right-0 accent-bg px-3 py-1 text-[9px] text-white font-bold tracking-widest uppercase"
                     >
                       Upcoming
                     </div>
                   </div>
                   <h3
-                    class="text-[10px] uppercase tracking-widest text-gray-400 mb-1 group-hover:text-black transition-colors"
+                      class="text-[10px] uppercase tracking-widest text-gray-400 mb-1 group-hover:text-black transition-colors"
                   >
                     {{ item.name }}
                   </h3>
@@ -479,7 +484,7 @@ const connectWebSocket = () => {
       <div :class="isDone ? 'block' : 'hidden'">
         <div id="auctionStatus" class="bg-[#2B2B2B] text-white border-b border-black">
           <div
-            class="max-w-7xl mx-auto px-6 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
+              class="max-w-7xl mx-auto px-6 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2"
           >
             <div>
               <p class="text-sm font-light">
@@ -501,13 +506,13 @@ const connectWebSocket = () => {
             <div class="space-y-6">
               <div class="relative bg-gray-50 border border-gray-100 overflow-hidden">
                 <img
-                  :src="auctionDetail.image"
-                  class="w-full aspect-[4/4.5] object-cover grayscale"
-                  alt="product"
+                    :src="auctionDetail.image"
+                    class="w-full aspect-[4/4.5] object-cover grayscale"
+                    alt="product"
                 />
 
                 <div
-                  class="absolute inset-0 bg-black/55 flex flex-col items-center justify-center text-center"
+                    class="absolute inset-0 bg-black/55 flex flex-col items-center justify-center text-center"
                 >
                   <p class="luxury-font text-3xl tracking-[0.35em] text-white mb-3">
                     AUCTION CLOSED
@@ -520,7 +525,7 @@ const connectWebSocket = () => {
             <!-- Right -->
             <div class="flex flex-col">
               <span
-                class="inline-block px-3 py-1 bg-gray-200 text-gray-600 text-[10px] font-bold rounded-full mb-4 tracking-widest uppercase"
+                  class="inline-block px-3 py-1 bg-gray-200 text-gray-600 text-[10px] font-bold rounded-full mb-4 tracking-widest uppercase"
               >
                 Auction Closed
               </span>
@@ -552,15 +557,15 @@ const connectWebSocket = () => {
                 </div>
 
                 <div
-                  class="mt-6 border-t border-gray-200 pt-6 text-sm text-gray-600 leading-relaxed"
+                    class="mt-6 border-t border-gray-200 pt-6 text-sm text-gray-600 leading-relaxed"
                 >
                   이 경매는 종료되었습니다.<br />
                   낙찰자는 마이페이지에서 주문 및 배송 상태를 확인할 수 있습니다.
                 </div>
 
                 <a
-                  href="./orders.html"
-                  class="inline-block mt-6 px-6 py-4 text-[11px] font-bold uppercase tracking-[0.3em] border border-gray-300 hover:border-[#A39382] hover:text-[#A39382] transition"
+                    href="./orders.html"
+                    class="inline-block mt-6 px-6 py-4 text-[11px] font-bold uppercase tracking-[0.3em] border border-gray-300 hover:border-[#A39382] hover:text-[#A39382] transition"
                 >
                   주문 / 배송 확인
                 </a>
