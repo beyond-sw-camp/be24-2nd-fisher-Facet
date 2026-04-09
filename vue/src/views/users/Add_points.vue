@@ -68,7 +68,7 @@ const changePoint = async () => {
     // ==========================================================
     // 1. 백엔드에 결제 준비(READY) 요청 
     // ==========================================================
-    const createRes = await axios.post('http://localhost:8080/point/create', {
+    const createRes = await axios.post('https://www.facet7.kro.kr/api/point/create', {
       amount: totalPoints.value
     }, {
       withCredentials: true 
@@ -86,8 +86,8 @@ const changePoint = async () => {
     // 2. 포트원 실제 결제창 띄우기
     // ==========================================================
     const paymentResponse = await PortOne.requestPayment({
-      storeId: "store-6d92075a-fcc0-4920-afaf-b9df41abe7ec",
-      channelKey: "channel-key-5d4867e9-7b9c-4530-83f9-cf13dbe67c57", 
+      storeId: "store-c4620c46-17fa-4ebc-ac59-8d04c156cbf4",
+      channelKey: "channel-key-dafcb684-1f58-465d-9fad-97b92723116d", 
       paymentId: uniquePaymentId, // 백엔드에서 받아온 주문번호 사용
       orderName: `Facet 포인트 ${totalPoints.value.toLocaleString()}원 충전`,
       totalAmount: totalPoints.value,
@@ -103,7 +103,7 @@ const changePoint = async () => {
   
     // 3. 백엔드에 결제 검증 및 충전 요청
     // ==========================================================
-    const verifyRes = await axios.post('http://localhost:8080/point/verify', {
+    const verifyRes = await axios.post('https://www.facet7.kro.kr/api/point/verify', {
       paymentId: paymentResponse.paymentId, 
       pointIdx: pointIdx 
     }, {
@@ -142,7 +142,7 @@ const changePoint = async () => {
 const fetchCurrentPoint = async () => {
   try {
     // 💡 주의: 아래 주소는 회원님의 실제 '유저 정보 조회 API' 주소로 변경하셔야 합니다! (예: /user/info, /user/mypage 등)
-    const res = await axios.get('http://localhost:8080/point/current', {
+    const res = await axios.get('https://www.facet7.kro.kr/api/point/current', {
       withCredentials: true
     });
 
